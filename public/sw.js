@@ -17,6 +17,7 @@ this.addEventListener("fetch", (event) => {
     if (event.request.url.includes('/@vite/client') || event.request.url.includes('/src/main.jsx')) {
         return;
     }
+    
     event.respondWith(
         caches.match(event.request).then((cacheRes) => {
 

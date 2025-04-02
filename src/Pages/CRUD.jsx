@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import initDB from "../db/IndexedDB";
 const CRUD = () => {
     const [posts, setPosts] = useState([]);
     const [title, setTitle] = useState("");
