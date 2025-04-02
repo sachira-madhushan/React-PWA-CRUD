@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import initDB from "../db/IndexedDB";
+import usePosts from "../indexedDB/usePosts";
+
+
 const CRUD = () => {
     const [posts, setPosts] = useState([]);
     const [title, setTitle] = useState("");
     const [body, setBody] = useState("");
+    const [postsFromIDB, isOffline]=usePosts();
 
     const fetchPosts = async () => {
         try {
