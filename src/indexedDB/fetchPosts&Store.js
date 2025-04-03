@@ -9,7 +9,7 @@ const fetchAndStorePosts = async () => {
 
     const transaction = db.transaction('posts', 'readwrite');
     const store = transaction.objectStore('posts');
-
+    store.clear();
     posts.forEach(post => {
       post.syncStatus='synced';
       store.put(post);
