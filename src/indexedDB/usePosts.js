@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import initDB from './db';
-
-const usePosts = () => {
+import initDB from './../db/IndexedDB';
+import fetchAndStorePosts from './fetchPosts&Store';
+const usePostsIDB = () => {
   const [postsFromIDB, setPosts] = useState([]);
   const [isOffline, setIsOffline] = useState(false);
 
@@ -27,4 +27,4 @@ const usePosts = () => {
   return { postsFromIDB, isOffline };
 };
 
-export default usePosts;
+export default usePostsIDB;

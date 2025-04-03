@@ -2,7 +2,7 @@ import initDB from './../db/IndexedDB';
 
 const fetchAndStorePosts = async () => {
   try {
-    const response = await fetch('http://localhost:3000/posts');
+    const response = await fetch('http://localhost:4000/posts');
     const posts = await response.json();
 
     const db = await initDB();

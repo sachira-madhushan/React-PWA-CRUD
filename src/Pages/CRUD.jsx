@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import usePosts from "../indexedDB/usePosts";
+import usePostsIDB from "../indexedDB/usePosts";
 
 
 const CRUD = () => {
     const [posts, setPosts] = useState([]);
     const [title, setTitle] = useState("");
     const [body, setBody] = useState("");
-    const [postsFromIDB, isOffline]=usePosts();
+    const { postsFromIDB, isOffline}=usePostsIDB();
 
     const fetchPosts = async () => {
         try {
-            const response = await axios.get("http://localhost:3000/posts", {
+            const response = await axios.get("http://localhost:4000/posts", {
                 headers: {
 
                     "Content-Type": "application/json",
@@ -27,7 +27,7 @@ const CRUD = () => {
 
     const createPost = async () => {
         try {
-            const response = await axios.post("http://localhost:3000/posts", {
+            const response = await axios.post("http://localhost:4000/posts", {
                 title:title,
                 body:body,
             }, {
@@ -47,7 +47,7 @@ const CRUD = () => {
 
     const deletePost = async (id) => {
         try {
-            await axios.delete(`http://localhost:3000/posts/${id}`);
+            await axios.delete(`http://localhost:4000/posts/${id}`);
             setPosts(posts.filter((post) => post.id !== id));
         } catch (error) {
             console.error("Error deleting post:", error);
@@ -60,6 +60,11 @@ const CRUD = () => {
 
     return (
         <div className="p-6 max-w-4xl mx-auto">
+            {/* {isOffline && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
+                    <span className="block sm:inline"> You are currently offline.</span>
+                </div>
+            )} */}
             <h1 className="text-2xl font-bold mb-4">CRUD Posts</h1>
             <div className="mb-6">
                 <input
