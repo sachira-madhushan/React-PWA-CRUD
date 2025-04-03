@@ -9,7 +9,7 @@ const CRUD = () => {
     const [body, setBody] = useState("");
     const { postsFromIDB, isOffline}=usePostsIDB();
     const { postsIDB,getPostsIDB, addPostIDB, updatePostIDB, deletePostIDB,} = idbPostCRUD();
-    const [syncStatusLocal, setSyncStatusLocal] = useState(false);
+    const [syncStatusLocal, setSyncStatusLocal] = useState(true);
 
     const fetchPosts = async () => {
         // try {

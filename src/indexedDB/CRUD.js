@@ -4,7 +4,7 @@ import initDB from '../db/IndexedDB';
 const idbPostCRUD = () => {
     const [postsIDB, setPosts] = useState([]);
     const [db, setDb] = useState(null);
-    const [syncStatus, setSyncStatus] = useState(true);
+    const [syncStatus, setSyncStatus] = useState(false);
 
     useEffect(() => {
         const initializeDB = async () => {
@@ -16,18 +16,20 @@ const idbPostCRUD = () => {
 
     useEffect(() => {
         getPostsIDB();
-    },[db])
+    }, [db])
 
     const getPostsIDB = async () => {
         if (db) {
             const allPosts = await db.getAll('posts');
-            setPosts(allPosts);
+            const filteredPosts = allPosts.filter(post => post.syncStatus !== 'deleted');
+            setPosts(filteredPosts);
         }
     };
 
-    const addPostIDB = async (id) => {
+    const addPostIDB = async (post) => {
+        post.syncStatus = 'pending';
         if (db) {
-            await db.add('posts', id);
+            await db.add('posts', post);
             getPostsIDB();
         }
     };
@@ -35,6 +37,7 @@ const idbPostCRUD = () => {
 
     const updatePostIDB = async (post) => {
         if (db) {
+            post.syncStatus = 'updated';
             await db.put('posts', post);
             getPostsIDB();
         }
@@ -43,8 +46,15 @@ const idbPostCRUD = () => {
 
     const deletePostIDB = async (id) => {
         if (db) {
-            await db.delete('posts', id);
-            getPostsIDB();
+            const post = postsIDB.find((post) => post.id === id);
+
+            if (post) {
+                post.syncStatus = 'deleted';
+                await db.put('posts', post);
+                
+                getPostsIDB();
+            }
+
         }
     };
 

@@ -11,6 +11,7 @@ const fetchAndStorePosts = async () => {
     const store = transaction.objectStore('posts');
 
     posts.forEach(post => {
+      post.syncStatus='synced';
       store.put(post);
     });
 
