@@ -8,7 +8,7 @@ const CRUD = () => {
 
     const fetchPosts = async () => {
         try {
-            const response = await axios.get("http://localhost:3000/posts", {
+            const response = await axios.get("http://localhost:4000/posts", {
                 headers: {
 
                     "Content-Type": "application/json",
@@ -24,7 +24,7 @@ const CRUD = () => {
 
     const createPost = async () => {
         try {
-            const response = await axios.post("http://localhost:3000/posts", {
+            const response = await axios.post("http://localhost:4000/posts", {
                 title:title,
                 body:body,
             }, {
@@ -44,7 +44,7 @@ const CRUD = () => {
 
     const deletePost = async (id) => {
         try {
-            await axios.delete(`http://localhost:3000/posts/${id}`);
+            await axios.delete(`http://localhost:4000/posts/${id}`);
             setPosts(posts.filter((post) => post.id !== id));
         } catch (error) {
             console.error("Error deleting post:", error);

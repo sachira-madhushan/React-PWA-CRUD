@@ -8,6 +8,9 @@ this.addEventListener("install", e => {
                 "/index.html",
                 "/sw.js",
                 '/vite.svg',
+                '/assets/index-CgdpMj_y.css',
+                '/assets/index-UwfN1leK.js',
+                '/assets/react-CHdo91hT.svg',
             ])
         })
     )
