@@ -64,7 +64,7 @@ const CRUD = () => {
         //     console.error("Error deleting post:", error);
         // }
         if(!isOffline){
-            deletePostIDB({id,title,body});
+            deletePostIDB(id);
         }
     };
 

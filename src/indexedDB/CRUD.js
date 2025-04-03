@@ -24,9 +24,9 @@ const idbPostCRUD = () => {
         }
     };
 
-    const addPostIDB = async (post) => {
+    const addPostIDB = async (id) => {
         if (db) {
-            await db.add('posts', post);
+            await db.add('posts', id);
             getPostsIDB();
         }
     };
