@@ -26,6 +26,10 @@ const CRUD = () => {
         //     console.error("Error fetching posts:", error);
         // }
         if(!isOffline){
+            const filteredPosts = postsIDB.filter(post => post.syncStatus !== 'synced');
+            if(filteredPosts.length>0){
+                setSyncStatusLocal(false);
+            }
             setPosts(postsIDB);
         }
         
