@@ -4,6 +4,7 @@ import initDB from '../db/IndexedDB';
 const idbPostCRUD = () => {
     const [postsIDB, setPosts] = useState([]);
     const [db, setDb] = useState(null);
+    const [syncStatus, setSyncStatus] = useState(true);
 
     useEffect(() => {
         const initializeDB = async () => {
@@ -47,7 +48,9 @@ const idbPostCRUD = () => {
         }
     };
 
+
     return {
+        syncStatus,
         postsIDB,
         getPostsIDB,
         addPostIDB,
