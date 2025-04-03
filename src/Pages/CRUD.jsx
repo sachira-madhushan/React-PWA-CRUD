@@ -1,70 +1,84 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import usePostsIDB from "../indexedDB/usePosts";
-
+import idbPostCRUD from "../indexedDB/CRUD";
 
 const CRUD = () => {
     const [posts, setPosts] = useState([]);
     const [title, setTitle] = useState("");
     const [body, setBody] = useState("");
     const { postsFromIDB, isOffline}=usePostsIDB();
+    const { postsIDB,getPostsIDB, addPostIDB, updatePostIDB, deletePostIDB } = idbPostCRUD();
 
     const fetchPosts = async () => {
-        try {
-            const response = await axios.get("http://localhost:4000/posts", {
-                headers: {
+        // try {
+        //     const response = await axios.get("http://localhost:4000/posts", {
+        //         headers: {
 
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                }
-            });
-            setPosts(response.data);
-            console.log(response.data);
-        } catch (error) {
-            console.error("Error fetching posts:", error);
+        //             "Content-Type": "application/json",
+        //             "Accept": "application/json",
+        //         }
+        //     });
+        //     setPosts(response.data);
+        //     console.log(response.data);
+        // } catch (error) {
+        //     console.error("Error fetching posts:", error);
+        // }
+        if(!isOffline){
+            setPosts(postsIDB);
         }
+        
+
     };
 
     const createPost = async () => {
-        try {
-            const response = await axios.post("http://localhost:4000/posts", {
-                title:title,
-                body:body,
-            }, {
-                headers: {
+        // try {
+        //     const response = await axios.post("http://localhost:4000/posts", {
+        //         title:title,
+        //         body:body,
+        //     }, {
+        //         headers: {
 
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                }
-            });
-            setPosts([response.data, ...posts]);
-            setTitle("");
-            setBody("");
-        } catch (error) {
-            console.error("Error creating post:", error);
+        //             "Content-Type": "application/json",
+        //             "Accept": "application/json",
+        //         }
+        //     });
+        //     setPosts([response.data, ...posts]);
+        //     setTitle("");
+        //     setBody("");
+        // } catch (error) {
+        //     console.error("Error creating post:", error);
+        // }
+
+        if(!isOffline){
+            addPostIDB({ title, body });
         }
+
     };
 
     const deletePost = async (id) => {
-        try {
-            await axios.delete(`http://localhost:4000/posts/${id}`);
-            setPosts(posts.filter((post) => post.id !== id));
-        } catch (error) {
-            console.error("Error deleting post:", error);
+        // try {
+        //     await axios.delete(`http://localhost:4000/posts/${id}`);
+        //     setPosts(posts.filter((post) => post.id !== id));
+        // } catch (error) {
+        //     console.error("Error deleting post:", error);
+        // }
+        if(!isOffline){
+            deletePostIDB({id,title,body});
         }
     };
 
     useEffect(() => {
         fetchPosts();
-    }, []);
+    }, [postsIDB]);
 
     return (
         <div className="p-6 max-w-4xl mx-auto">
-            {/* {isOffline && (
+            {isOffline && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
                     <span className="block sm:inline"> You are currently offline.</span>
                 </div>
-            )} */}
+            )}
             <h1 className="text-2xl font-bold mb-4">CRUD Posts</h1>
             <div className="mb-6">
                 <input
