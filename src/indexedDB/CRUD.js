@@ -96,6 +96,7 @@ const idbPostCRUD = () => {
     return {
         syncStatus,
         postsIDB,
+        allPostsIDB,
         getPostsIDB,
         addPostIDB,
         updatePostIDB,

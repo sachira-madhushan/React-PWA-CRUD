@@ -9,7 +9,7 @@ const CRUD = () => {
     const [title, setTitle] = useState("");
     const [body, setBody] = useState("");
     const { postsFromIDB, isOffline } = usePostsIDB();
-    const { postsIDB, getPostsIDB, addPostIDB, updatePostIDB, deletePostIDB, sync } = idbPostCRUD();
+    const { postsIDB,allPostsIDB, getPostsIDB, addPostIDB, updatePostIDB, deletePostIDB, sync } = idbPostCRUD();
     const [syncStatusLocal, setSyncStatusLocal] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -27,7 +27,7 @@ const CRUD = () => {
         // } catch (error) {
         //     console.error("Error fetching posts:", error);
         // }
-        const filteredPosts = postsIDB.filter(post => post.syncStatus !== 'synced');
+        const filteredPosts = allPostsIDB.filter(post => post.syncStatus !== 'synced');
         if (filteredPosts.length > 0) {
             setSyncStatusLocal(false);
         }
@@ -74,14 +74,15 @@ const CRUD = () => {
     };
 
     const syncToCloud = async () => {
+        
         if (isOffline) {
             alert("You are offline. Please connect to the internet to sync.");
-
         } else {
             setIsLoading(true);
             await sync()
             setIsLoading(false)
             setSyncStatusLocal(true);
+            fetchPosts();
         }
         // if (!isOffline) {
         //     try {
