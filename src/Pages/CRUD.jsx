@@ -79,10 +79,15 @@ const CRUD = () => {
     };
 
     const syncToCloud = async () => {
-        setIsLoading(true);
-        await sync()
-        setIsLoading(false)
-        setSyncStatusLocal(true);
+        if (isOffline) {
+            alert("You are offline. Please connect to the internet to sync.");
+
+        } else {
+            setIsLoading(true);
+            await sync()
+            setIsLoading(false)
+            setSyncStatusLocal(true);
+        }
         // if (!isOffline) {
         //     try {
         //         const response = await axios.post("http://localhost:4000/posts/sync", {
