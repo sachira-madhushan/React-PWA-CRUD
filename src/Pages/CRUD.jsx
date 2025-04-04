@@ -1,15 +1,18 @@
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import usePostsIDB from "../indexedDB/usePosts";
 import idbPostCRUD from "../indexedDB/CRUD";
+import fetchAndStorePosts from "../indexedDB/fetchPosts&Store";
 
 const CRUD = () => {
     const [posts, setPosts] = useState([]);
     const [title, setTitle] = useState("");
     const [body, setBody] = useState("");
-    const { postsFromIDB, isOffline}=usePostsIDB();
-    const { postsIDB,getPostsIDB, addPostIDB, updatePostIDB, deletePostIDB,} = idbPostCRUD();
+    const { postsFromIDB, isOffline } = usePostsIDB();
+    const { postsIDB,allPostsIDB, getPostsIDB, addPostIDB, updatePostIDB, deletePostIDB, sync } = idbPostCRUD();
     const [syncStatusLocal, setSyncStatusLocal] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
 
     const fetchPosts = async () => {
         // try {
@@ -25,14 +28,12 @@ const CRUD = () => {
         // } catch (error) {
         //     console.error("Error fetching posts:", error);
         // }
-        if(!isOffline){
-            const filteredPosts = postsIDB.filter(post => post.syncStatus !== 'synced');
-            if(filteredPosts.length>0){
-                setSyncStatusLocal(false);
-            }
-            setPosts(postsIDB);
+        const filteredPosts = allPostsIDB.filter(post => post.syncStatus !== 'synced');
+        if (filteredPosts.length > 0) {
+            setSyncStatusLocal(false);
         }
-        
+        setPosts(postsIDB);
+
 
     };
 
@@ -55,10 +56,8 @@ const CRUD = () => {
         //     console.error("Error creating post:", error);
         // }
 
-        if(!isOffline){
-            setSyncStatusLocal(false);
-            addPostIDB({ title, body });
-        }
+        setSyncStatusLocal(false);
+        addPostIDB({ title, body });
 
     };
 
@@ -69,16 +68,58 @@ const CRUD = () => {
         // } catch (error) {
         //     console.error("Error deleting post:", error);
         // }
-        if(!isOffline){
-            setSyncStatusLocal(false);
-            deletePostIDB(id);
-        }
+        setSyncStatusLocal(false);
+        deletePostIDB(id);
+        console.log(posts, postsIDB);
+
     };
 
     const syncToCloud = async () => {
-        if(!isOffline) {
+        
+        if (isOffline) {
+            alert("You are offline. Please connect to the internet to sync.");
+        } else {
+            setIsLoading(true);
+            await sync()
+            setIsLoading(false)
             setSyncStatusLocal(true);
+            fetchPosts();
         }
+        // if (!isOffline) {
+        //     try {
+        //         const response = await axios.post("http://localhost:4000/posts/sync", {
+        //             posts:postsIDB
+        //         },
+
+        //             {
+        //                 headers: {
+        //                     "Content-Type": "application/json",
+        //                     "Accept": "application/json",
+        //                 }
+        //             });
+        //         if(response.status==200){
+        //             console.log(response.data);
+        //             //await fetchAndStorePosts();
+        //             // await getPostsIDB();
+        //             // await setPosts(postsIDB);
+        //             //setSyncStatusLocal(true);
+        //             // setPosts(response.data.posts);
+        //             alert("Successfully sync with cloud")
+        //         }else{
+        //             alert("Error while syncing")
+        //         }
+
+        //         console.log(response.data);
+        //     } catch (error) {
+        //         console.error("Error fetching posts:", error);
+        //     } finally {
+        //         setIsLoading(false);
+
+        //     }
+
+        // } else {
+
+        // }
     }
 
     useEffect(() => {
@@ -93,14 +134,15 @@ const CRUD = () => {
                 </div>
             )}
             {
-                !syncStatusLocal&&(
+                !syncStatusLocal && (
                     <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-4 rounded mb-4" role="alert">
                         <span className="block sm:inline">There are some unsynced Data please sync.</span>
+
                         <button
                             onClick={() => syncToCloud()}
                             className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 float-right"
                         >
-                            Sync
+                            {isLoading ? "Syncing..." : "Sync"}
                         </button>
                     </div>
                 )
@@ -128,7 +170,7 @@ const CRUD = () => {
                 </button>
             </div>
             <div>
-                {posts.map((post) => (
+                {Array.isArray(posts) && posts.map((post) => (
                     <div
                         key={post.id}
                         className="border p-4 mb-4 rounded shadow-sm flex justify-between items-center"
