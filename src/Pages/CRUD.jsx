@@ -27,13 +27,11 @@ const CRUD = () => {
         // } catch (error) {
         //     console.error("Error fetching posts:", error);
         // }
-        if (!isOffline) {
-            const filteredPosts = postsIDB.filter(post => post.syncStatus !== 'synced');
-            if (filteredPosts.length > 0) {
-                setSyncStatusLocal(false);
-            }
-            setPosts(postsIDB);
+        const filteredPosts = postsIDB.filter(post => post.syncStatus !== 'synced');
+        if (filteredPosts.length > 0) {
+            setSyncStatusLocal(false);
         }
+        setPosts(postsIDB);
 
 
     };
@@ -57,10 +55,8 @@ const CRUD = () => {
         //     console.error("Error creating post:", error);
         // }
 
-        if (!isOffline) {
-            setSyncStatusLocal(false);
-            addPostIDB({ title, body });
-        }
+        setSyncStatusLocal(false);
+        addPostIDB({ title, body });
 
     };
 
@@ -71,11 +67,10 @@ const CRUD = () => {
         // } catch (error) {
         //     console.error("Error deleting post:", error);
         // }
-        if (!isOffline) {
-            setSyncStatusLocal(false);
-            deletePostIDB(id);
-            console.log(posts, postsIDB);
-        }
+        setSyncStatusLocal(false);
+        deletePostIDB(id);
+        console.log(posts, postsIDB);
+
     };
 
     const syncToCloud = async () => {
