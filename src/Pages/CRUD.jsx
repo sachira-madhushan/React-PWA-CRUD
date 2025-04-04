@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import sqlLiteCRUD from "../db/crudSQLite";
 
 const CRUD = () => {
     const [posts, setPosts] = useState([]);
     const [title, setTitle] = useState("");
     const [body, setBody] = useState("");
+    const {createTable} = sqlLiteCRUD();
 
     const fetchPosts = async () => {
         try {
