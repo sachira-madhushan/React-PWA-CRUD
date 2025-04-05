@@ -67,7 +67,7 @@ const idbPostCRUD = () => {
     const sync = async () => {
 
         try {
-            const response = await axios.post("http://localhost:4000/posts/sync", {
+            const response = await axios.post("https://react-pwa-crud-backend.onrender.com/posts/sync", {
                 posts: allPostsIDB
             },
 
@@ -78,7 +78,7 @@ const idbPostCRUD = () => {
                     }
                 });
             if (response.status == 200) {
-                
+                // db.transaction('posts', 'readwrite').objectStore('posts').clear();
                 await fetchAndStorePosts();
                 await getPostsIDB();
                 alert("Successfully sync with cloud")
