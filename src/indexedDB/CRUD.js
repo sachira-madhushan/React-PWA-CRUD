@@ -86,7 +86,7 @@ const idbPostCRUD = () => {
                 alert("Error while syncing")
             }
 
-        
+
         } catch (error) {
             console.error("Error fetching posts:", error);
         }

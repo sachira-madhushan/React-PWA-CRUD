@@ -29,7 +29,8 @@ export default defineConfig({
           type: 'image/png'
         }]
     },
-    filename: 'sw.js',
+    srcDir: 'src',
+    filename: 'IDBSW.js',
   })
   ],
 })
