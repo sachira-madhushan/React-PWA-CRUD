@@ -4,13 +4,14 @@ import axios from "axios";
 import usePostsIDB from "../indexedDB/usePosts";
 import idbPostCRUD from "../indexedDB/CRUD";
 import fetchAndStorePosts from "../indexedDB/fetchPosts&Store";
+import addBulkDataToIndexedDB from "../indexedDB/bulkLoad";
 
 const CRUD = () => {
     const [posts, setPosts] = useState([]);
     const [title, setTitle] = useState("");
     const [body, setBody] = useState("");
     const { postsFromIDB, isOffline } = usePostsIDB();
-    const { postsIDB,allPostsIDB, getPostsIDB, addPostIDB, updatePostIDB, deletePostIDB, sync } = idbPostCRUD();
+    const { postsIDB, allPostsIDB, getPostsIDB, addPostIDB, updatePostIDB, deletePostIDB, sync } = idbPostCRUD();
     const [syncStatusLocal, setSyncStatusLocal] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -75,7 +76,7 @@ const CRUD = () => {
     };
 
     const syncToCloud = async () => {
-        
+
         if (isOffline) {
             alert("You are offline. Please connect to the internet to sync.");
         } else {
@@ -147,6 +148,17 @@ const CRUD = () => {
                     </div>
                 )
             }
+
+            <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-4 rounded mb-4" role="alert">
+                <span className="block sm:inline">Add bulk data</span>
+
+                <button
+                    onClick={() => addBulkDataToIndexedDB()}
+                    className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 float-right"
+                >Add
+                </button>
+            </div>
+
             <h1 className="text-2xl font-bold mb-4">CRUD Posts</h1>
             <div className="mb-6">
                 <input
