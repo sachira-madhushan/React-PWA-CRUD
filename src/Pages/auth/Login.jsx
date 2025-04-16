@@ -1,14 +1,42 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-
+import axios from "axios";
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log("Email:", email, "Password:", password);
+        login();
     };
+
+    const login = async () => {
+
+        try {
+            const response = await axios.post("http://localhost:4000/api/v1/auth/login", {
+                email: email,
+                password: password,
+            }, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                }
+            });
+
+            if (response.status === 200) {
+                alert("Login successful!");
+                localStorage.setItem("token", response.data.token);
+                localStorage.setItem("user", JSON.stringify(response.data.user));
+                window.location.href = "/crud";
+            }
+            else {
+                alert("Invalid credentials. Please try again.");
+            }
+
+        } catch (error) {
+            alert("Error while login"+error);
+        }
+    }
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">

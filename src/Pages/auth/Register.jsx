@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 const Register = () => {
@@ -14,8 +15,36 @@ const Register = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log("Form Data Submitted:", formData);
+        registerUser();
     };
+
+    const registerUser = async () => {
+        const { name, email, password } = formData;
+        try {
+            const response = await axios.post("http://localhost:4000/api/v1/auth/register", {
+                name:name,
+                email:email,
+                password:password,
+            }, {
+                headers: {
+
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                }
+            });
+
+            if(response.status === 201) {
+                alert("Registration successful! Please login.");
+                window.location.href="/login";
+            }
+            else {
+                alert("Registration failed. Please try again.");
+            }
+            
+        } catch (error) {
+            alert("Error while registering");
+        }
+    }
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
