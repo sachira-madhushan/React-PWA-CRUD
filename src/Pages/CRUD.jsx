@@ -10,9 +10,17 @@ const CRUD = () => {
     const [title, setTitle] = useState("");
     const [body, setBody] = useState("");
     const { postsFromIDB, isOffline } = usePostsIDB();
-    const { postsIDB,allPostsIDB, getPostsIDB, addPostIDB, updatePostIDB, deletePostIDB, sync } = idbPostCRUD();
+    const { postsIDB, allPostsIDB, getPostsIDB, addPostIDB, updatePostIDB, deletePostIDB, sync } = idbPostCRUD();
     const [syncStatusLocal, setSyncStatusLocal] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
+    const user=JSON.parse(localStorage.getItem('user'));
+
+    const logout=async()=>{
+        localStorage.removeItem("token")
+        localStorage.removeItem("user")
+        indexedDB.deleteDatabase("postsDB");
+        window.location.reload()
+    }
 
     const fetchPosts = async () => {
         // try {
@@ -75,7 +83,7 @@ const CRUD = () => {
     };
 
     const syncToCloud = async () => {
-        
+
         if (isOffline) {
             alert("You are offline. Please connect to the internet to sync.");
         } else {
@@ -147,7 +155,11 @@ const CRUD = () => {
                     </div>
                 )
             }
-            <h1 className="text-2xl font-bold mb-4">CRUD Posts</h1>
+            <div>
+                <h1 className="text-2xl font-bold mb-4 float-left">PWA</h1>
+                <h1 className="text-2xl font-bold mb-4 float-right">Hello {user.name}!</h1>
+                <button type="button" className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 float-right mr-2" onClick={()=>logout()}>Logout</button>
+            </div>
             <div className="mb-6">
                 <input
                     type="text"
