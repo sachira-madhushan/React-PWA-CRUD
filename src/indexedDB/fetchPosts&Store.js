@@ -2,7 +2,7 @@ import initDB from './../db/IndexedDB';
 
 const fetchAndStorePosts = async () => {
   try {
-    const response = await fetch('https://react-pwa-crud-backend.onrender.com/posts');
+    const response = await fetch('http://localhost:4000/api/v1/posts');
     const posts = await response.json();
 
     const db = await initDB();
