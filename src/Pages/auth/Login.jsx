@@ -24,17 +24,22 @@ const Login = () => {
             });
 
             if (response.status === 200) {
-                alert("Login successful!");
-                localStorage.setItem("token", response.data.token);
-                localStorage.setItem("user", JSON.stringify(response.data.user));
-                window.location.href="/";
+                
+                if (response.data.user.status == 1) {
+                    alert("Login successful!");
+                    localStorage.setItem("token", response.data.token);
+                    localStorage.setItem("user", JSON.stringify(response.data.user));
+                }else{
+                    alert("Your account is not activated yet. Please contact admin.");
+                }
+                window.location.href = "/";
             }
             else {
                 alert("Invalid credentials. Please try again.");
             }
 
         } catch (error) {
-            alert("Error while login"+error);
+            alert("Error while login" + error);
         }
     }
 
