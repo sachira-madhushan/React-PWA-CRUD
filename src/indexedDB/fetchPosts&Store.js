@@ -1,9 +1,16 @@
 import initDB from './../db/IndexedDB';
-
+import axios from 'axios';
 const fetchAndStorePosts = async () => {
   try {
-    const response = await fetch('http://localhost:4000/api/v1/posts');
-    const posts = await response.json();
+    const response = await axios.get("http://localhost:4000/api/v1/posts/",
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem('token')}`,
+        }
+      });
+    const posts = await response.data;
 
     const db = await initDB();
 
@@ -11,7 +18,7 @@ const fetchAndStorePosts = async () => {
     const store = transaction.objectStore('posts');
     store.clear();
     posts.forEach(post => {
-      post.syncStatus='synced';
+      post.syncStatus = 'synced';
       store.put(post);
     });
 
