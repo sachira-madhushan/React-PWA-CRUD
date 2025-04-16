@@ -35,7 +35,7 @@ const Register = () => {
 
             if(response.status === 201) {
                 alert("Registration successful! Please login.");
-                window.location.href="/login";
+                window.location.href="/";
             }
             else {
                 alert("Registration failed. Please try again.");
@@ -102,7 +102,7 @@ const Register = () => {
                 </form>
                 <p className="text-sm text-center text-gray-600">
                     Already have an account?{" "}
-                    <Link to="/login" className="text-blue-500 hover:underline">
+                    <Link to="/" className="text-blue-500 hover:underline">
                         Login here
                     </Link>
                 </p>

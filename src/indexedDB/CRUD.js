@@ -38,8 +38,6 @@ const idbPostCRUD = () => {
         }
     };
 
-
-
     const updatePostIDB = async (post) => {
         if (db) {
             post.syncStatus = 'updated';
@@ -47,7 +45,6 @@ const idbPostCRUD = () => {
             getPostsIDB();
         }
     };
-
 
     const deletePostIDB = async (id) => {
         if (db) {
@@ -67,7 +64,7 @@ const idbPostCRUD = () => {
     const sync = async () => {
 
         try {
-            const response = await axios.post("https://react-pwa-crud-backend.onrender.com/posts/sync", {
+            const response = await axios.post("http://localhost:4000/api/v1/posts/sync", {
                 posts: allPostsIDB
             },
 
@@ -86,7 +83,7 @@ const idbPostCRUD = () => {
                 alert("Error while syncing")
             }
 
-        
+
         } catch (error) {
             console.error("Error fetching posts:", error);
         }

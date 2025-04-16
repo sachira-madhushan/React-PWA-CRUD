@@ -7,12 +7,16 @@ import Login from './Pages/auth/Login'
 import { BrowserRouter,Routes,Route } from 'react-router-dom'
 import Register from './Pages/auth/Register'
 function App() {
+  const token= localStorage.getItem("token");
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<Login />} />
+        
         <Route path="/register" element={<Register />} />
-        <Route path="/CRUD" element={<CRUD/>} />
+        
+        {token?
+          <Route path="/" element={<CRUD/>} />:<Route path="/" element={<Login />} />
+        }
       </Routes>
     </BrowserRouter>
   )
