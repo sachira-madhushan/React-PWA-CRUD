@@ -80,13 +80,14 @@ const idbPostCRUD = () => {
                 await fetchAndStorePosts();
                 await getPostsIDB();
                 alert("Successfully sync with cloud")
-            } else {
-                alert("Error while syncing")
+            }else{
+                alert("Error while syncing posts with cloud");
             }
 
-
         } catch (error) {
-            console.error("Error fetching posts:", error);
+            alert("Your account has been deactivated. Please contact admin to reactivate.");
+            localStorage.clear();
+            window.location.reload();
         }
 
     }
