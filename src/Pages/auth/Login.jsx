@@ -40,7 +40,7 @@ const Login = () => {
             }
 
         } catch (error) {
-            alert("Error while login" + error);
+            alert("Invalid credentials. Please try again.");
         }
     }
 

@@ -4,6 +4,7 @@ import axios from "axios";
 import usePostsIDB from "../indexedDB/usePosts";
 import idbPostCRUD from "../indexedDB/CRUD";
 import fetchAndStorePosts from "../indexedDB/fetchPosts&Store";
+import moment from "moment-timezone";
 
 const CRUD = () => {
     const [posts, setPosts] = useState([]);
@@ -13,11 +14,11 @@ const CRUD = () => {
     const { postsIDB, allPostsIDB, getPostsIDB, addPostIDB, updatePostIDB, deletePostIDB, sync } = idbPostCRUD();
     const [syncStatusLocal, setSyncStatusLocal] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
-    const user=JSON.parse(localStorage.getItem('user'));
+    const user = JSON.parse(localStorage.getItem('user'));
+    const [remaining, setRemaining] = useState(0);
 
-    const logout=async()=>{
-        localStorage.removeItem("token")
-        localStorage.removeItem("user")
+    const logout = async () => {
+        localStorage.clear();
         indexedDB.deleteDatabase("postsDB");
         window.location.reload()
     }
@@ -130,9 +131,34 @@ const CRUD = () => {
         // }
     }
 
+    // const fetchEndDate = async () => {
+    //     const date =localStorage.getItem('expire_date');
+
+    //     if (date == null) {
+    //         localStorage.clear();
+    //         window.location.reload();
+    //     } else {
+
+    //         const expire_date = moment.tz(date, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
+    //         const now = moment.tz("Asia/Colombo");
+    //         const diffInMinutes = expire_date.diff(now, 'minutes');
+    //         setRemaining(diffInMinutes);
+    //         console.log(diffInMinutes)
+    //     }
+    // }
+
+    const updateRemaining=()=>{
+        setRemaining(remaining-1);
+        console.log(remaining);
+    }
+
     useEffect(() => {
         fetchPosts();
-    }, [postsIDB]);
+        // fetchEndDate();
+        // const interval = setInterval(() => {
+        //     updateRemaining();
+        // }, 60000);
+    }, [postsIDB,remaining]);
 
     return (
         <div className="p-6 max-w-4xl mx-auto">
@@ -158,7 +184,7 @@ const CRUD = () => {
             <div>
                 <h1 className="text-2xl font-bold mb-4 float-left">PWA</h1>
                 <h1 className="text-2xl font-bold mb-4 float-right">Hello {user.name}!</h1>
-                <button type="button" className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 float-right mr-2" onClick={()=>logout()}>Logout</button>
+                <button type="button" className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 float-right mr-2" onClick={() => logout()}>Logout</button>
             </div>
             <div className="mb-6">
                 <input
