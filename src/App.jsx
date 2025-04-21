@@ -8,13 +8,17 @@ import { BrowserRouter,Routes,Route } from 'react-router-dom'
 import Register from './Pages/auth/Register'
 function App() {
   const token= localStorage.getItem("token");
+  const user= localStorage.getItem("user");
+  const start_date= localStorage.getItem("start_date");
+  const end_date= localStorage.getItem("expire_date");
+
   return (
     <BrowserRouter>
       <Routes>
         
         <Route path="/register" element={<Register />} />
         
-        {token?
+        {token&&user&&start_date&&end_date?
           <Route path="/" element={<CRUD/>} />:<Route path="/" element={<Login />} />
         }
       </Routes>
