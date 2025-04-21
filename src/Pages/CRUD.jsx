@@ -23,6 +23,34 @@ const CRUD = () => {
         window.location.reload()
     }
 
+    setTimeout(() => {
+        const now = moment.tz("Asia/Colombo");
+        const startDate = localStorage.getItem("start_date");
+
+        const endDate = localStorage.getItem("expire_date");
+
+        const expire_date = moment.tz(endDate, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
+        const start_date = moment.tz(startDate, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
+
+        const diffInMinutes = expire_date.diff(now, 'minutes');
+
+        setRemaining(diffInMinutes);
+
+    }, 1000);
+
+    function formatDuration(minutes) {
+        const duration = moment.duration(minutes, 'minutes');
+
+        const years = Math.floor(duration.asYears());
+        const months = Math.floor(duration.asMonths() % 12);
+        const days = Math.floor(duration.asDays() % 30);
+        const hours = Math.floor(duration.asHours() % 24);
+        const mins = Math.floor(duration.asMinutes() % 60);
+
+        return `${years}y ${months}mo ${days}d ${hours}h ${mins}m`;
+    }
+
+
     const fetchPosts = async () => {
         // try {
         //     const response = await axios.get("http://localhost:4000/posts", {
@@ -131,34 +159,9 @@ const CRUD = () => {
         // }
     }
 
-    // const fetchEndDate = async () => {
-    //     const date =localStorage.getItem('expire_date');
-
-    //     if (date == null) {
-    //         localStorage.clear();
-    //         window.location.reload();
-    //     } else {
-
-    //         const expire_date = moment.tz(date, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
-    //         const now = moment.tz("Asia/Colombo");
-    //         const diffInMinutes = expire_date.diff(now, 'minutes');
-    //         setRemaining(diffInMinutes);
-    //         console.log(diffInMinutes)
-    //     }
-    // }
-
-    const updateRemaining=()=>{
-        setRemaining(remaining-1);
-        console.log(remaining);
-    }
-
     useEffect(() => {
         fetchPosts();
-        // fetchEndDate();
-        // const interval = setInterval(() => {
-        //     updateRemaining();
-        // }, 60000);
-    }, [postsIDB,remaining]);
+    }, [postsIDB]);
 
     return (
         <div className="p-6 max-w-4xl mx-auto">
@@ -181,6 +184,9 @@ const CRUD = () => {
                     </div>
                 )
             }
+            <div>
+                <h1 className="">{formatDuration(remaining)}</h1>
+            </div>
             <div>
                 <h1 className="text-2xl font-bold mb-4 float-left">PWA</h1>
                 <h1 className="text-2xl font-bold mb-4 float-right">Hello {user.name}!</h1>
