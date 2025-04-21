@@ -29,6 +29,7 @@ const Login = () => {
                     alert("Login successful!");
                     localStorage.setItem("token", response.data.token);
                     localStorage.setItem("user", JSON.stringify(response.data.user));
+                    localStorage.setItem("start_date", JSON.stringify(response.data.start_date));
                     localStorage.setItem("expire_date", JSON.stringify(response.data.expire_date));
                 }else{
                     alert("Your account is not activated yet. Please contact admin.");
