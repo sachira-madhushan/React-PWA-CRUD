@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import userData from "../../indexedDB/userData";
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const { setUserData, getUserName } = userData();
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -11,38 +13,56 @@ const Login = () => {
     };
 
     const login = async () => {
+        const name = await getUserName();
 
-        try {
-            const response = await axios.post("http://localhost:4000/api/v1/auth/login", {
-                email: email,
-                password: password,
-            }, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
+        if (name) {
+            console.log(name.value);
+        } else {
+            if (navigator.onLine) {
+                try {
+                    const response = await axios.post("http://localhost:4000/api/v1/auth/login", {
+                        email: email,
+                        password: password,
+                    }, {
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json",
+                        }
+                    });
+
+                    if (response.status === 200) {
+
+                        if (response.data.user.status == 1) {
+                            alert("Login successful!");
+                            localStorage.setItem("token", response.data.token);
+                            localStorage.setItem("user", JSON.stringify(response.data.user));
+                            localStorage.setItem("expire_date", JSON.stringify(response.data.expire_date));
+                            localStorage.setItem("last_sync", JSON.stringify(response.data.last_sync));
+                            try {
+                                await setUserData(response.data.expire_date,response.data.last_sync,response.data.user.name,response.data.user.email,password);
+                                
+                            } catch (error) {
+                                console.log(error);
+                            }
+                        } else {
+                            alert("Your account is not activated yet. Please contact admin.");
+                        }
+                        window.location.href = "/";
+                    }
+                    else {
+                        alert("Invalid credentials. Please try again.");
+                    }
+
+                } catch (error) {
+                    alert("Invalid credentials. Please try again.");
                 }
-            });
-
-            if (response.status === 200) {
-                
-                if (response.data.user.status == 1) {
-                    alert("Login successful!");
-                    localStorage.setItem("token", response.data.token);
-                    localStorage.setItem("user", JSON.stringify(response.data.user));
-                    localStorage.setItem("expire_date", JSON.stringify(response.data.expire_date));
-                    localStorage.setItem("last_sync", JSON.stringify(response.data.last_sync));
-                }else{
-                    alert("Your account is not activated yet. Please contact admin.");
-                }
-                window.location.href = "/";
-            }
-            else {
-                alert("Invalid credentials. Please try again.");
+            } else {
+                alert("Please login online")
             }
 
-        } catch (error) {
-            alert("Invalid credentials. Please try again.");
+
         }
+
     }
 
     return (

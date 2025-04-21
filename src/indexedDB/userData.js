@@ -1,0 +1,66 @@
+import { useEffect, useState } from "react";
+import { openDB } from "idb";
+const userData = () => {
+    const [db, setDb] = useState();
+
+    useEffect(() => {
+        const initializeDB = async () => {
+
+            const db = await openDB('userDB', 1, {
+                upgrade(db) {
+                    if (!db.objectStoreNames.contains('user')) {
+                        const store = db.createObjectStore('user',{
+                            keyPath: "key" 
+                        });
+                    }
+                },
+            });
+
+            setDb(db);
+
+        };
+        initializeDB();
+    }, []);
+
+    const setUserData = async (expire_date, last_sync, user_name,user_email,user_password) => {
+        const transaction =await db.transaction('user', 'readwrite');
+        const store = await transaction.objectStore('user');
+
+        store.put({key:"expire_date",value:expire_date});
+        store.put({key:"last_sync",value:last_sync});
+        store.put({key:"user_name",value:user_name});
+        store.put({key:"user_email",value:user_email});
+        store.put({key:"user_password",value:user_password});
+    }
+
+    const getUserName=async()=>{
+        const transaction =await db.transaction('user', 'readwrite');
+        const store = await transaction.objectStore('user');
+        return await store.get("user_name");
+    }
+
+    const getExpireDate = async () => {
+
+    }
+
+    const setLastSyncDate = async () => {
+
+    }
+
+    const getLastSyncDate = async () => {
+
+    }
+
+    const offlineLogin = async (email, password) => {
+
+    }
+
+    return {
+        setUserData,
+        getUserName
+    }
+
+}
+
+
+export default userData;

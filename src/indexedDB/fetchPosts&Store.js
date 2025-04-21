@@ -10,12 +10,13 @@ const fetchAndStorePosts = async () => {
           "Authorization": `Bearer ${localStorage.getItem('token')}`,
         }
       });
-    const posts = await response.data;
+    const posts = await response.data.posts;
 
     const db = await initDB();
 
     const transaction = db.transaction('posts', 'readwrite');
     const store = transaction.objectStore('posts');
+    localStorage.setItem("last_sync",response.data.last_sync)
     store.clear();
     posts.forEach(post => {
       post.syncStatus = 'synced';

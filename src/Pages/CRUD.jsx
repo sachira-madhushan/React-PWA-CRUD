@@ -36,11 +36,31 @@ const CRUD = () => {
             const expire_date = moment.tz(endDate, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
             const last_sync_formatted = moment.tz(last_sync, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
 
-            if(now<last_sync_formatted){
+            if (now < last_sync_formatted || expire_date < now) {
                 localStorage.clear();
                 window.location.reload();
             }
+
+
             const diffInMinutes = expire_date.diff(now, 'minutes');
+
+            const diffInSeconds = expire_date.diff(now, 'seconds');
+
+            if (diffInSeconds == 60*60* 24) {
+                alert("Your package will expire in 24 hours. Please contact admin to update your package.")
+            } else if (diffInSeconds == 60*60) {
+                alert("Your package will expire in 1 hour. Please contact admin to update your package.")
+
+            }else if (diffInSeconds == 30*60) {
+                alert("Your package will expire in 30 minutes. Please contact admin to update your package.")
+            }else if (diffInSeconds == 15*60) {
+                alert("Your package will expire in 15 minutes. Please contact admin to update your package.")
+
+            }else if (diffInSeconds == 5*60) {
+                alert("Your package will expire in 5 minutes. Please contact admin to update your package.")
+            }else if (diffInSeconds == 1*60) {
+                alert("Your package will expire in 1 minute. Please contact admin to update your package.")
+            }
 
             setRemaining(diffInMinutes);
 
