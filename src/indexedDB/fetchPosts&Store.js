@@ -27,9 +27,9 @@ const fetchAndStorePosts = async () => {
 
     console.log('Posts have been successfully stored in IndexedDB!');
   } catch (error) {
-    localStorage.clear();
-    window.location.reload();
-    console.error('Error fetching or storing posts:', error);
+    // localStorage.clear();
+    // window.location.reload();
+    // console.error('Error fetching or storing posts:', error);
   }
 };
 

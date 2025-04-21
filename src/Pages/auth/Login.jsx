@@ -5,7 +5,7 @@ import userData from "../../indexedDB/userData";
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const { setUserData, getUserName } = userData();
+    const { setUserData, getUserName,offlineLogin } = userData();
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -16,7 +16,14 @@ const Login = () => {
         const name = await getUserName();
 
         if (name) {
-            console.log(name.value);
+            const result=await offlineLogin(email,password);
+            if(result){
+                localStorage.setItem("is_user_loggedin",true);
+                alert("Login success!");
+                window.location.reload();
+            }else{
+                alert("Invalid credentials. Please try again.")
+            }
         } else {
             if (navigator.onLine) {
                 try {
@@ -38,7 +45,9 @@ const Login = () => {
                             localStorage.setItem("user", JSON.stringify(response.data.user));
                             localStorage.setItem("expire_date", JSON.stringify(response.data.expire_date));
                             localStorage.setItem("last_sync", JSON.stringify(response.data.last_sync));
+                            localStorage.setItem("is_user_loggedin",true);
                             try {
+
                                 await setUserData(response.data.expire_date,response.data.last_sync,response.data.user.name,response.data.user.email,password);
                                 
                             } catch (error) {

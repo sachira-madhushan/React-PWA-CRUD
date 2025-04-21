@@ -7,10 +7,7 @@ import Login from './Pages/auth/Login'
 import { BrowserRouter,Routes,Route } from 'react-router-dom'
 import Register from './Pages/auth/Register'
 function App() {
-  const token= localStorage.getItem("token");
-  const user= localStorage.getItem("user");
-  const expire_date= localStorage.getItem("expire_date");
-  const last_sync= localStorage.getItem("last_sync");
+  const user= localStorage.getItem("is_user_loggedin");
 
   return (
     <BrowserRouter>
@@ -18,7 +15,7 @@ function App() {
         
         <Route path="/register" element={<Register />} />
         
-        {token&&user&&expire_date&&last_sync?
+        {user?
           <Route path="/" element={<CRUD/>} />:<Route path="/" element={<Login />} />
         }
       </Routes>

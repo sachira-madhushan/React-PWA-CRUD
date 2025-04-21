@@ -43,6 +43,7 @@ const userData = () => {
     }
 
     const getUserName = async () => {
+        
         const transaction = await db.transaction('user', 'readwrite');
         const store = await transaction.objectStore('user');
         return await store.get("user_name");
@@ -61,12 +62,22 @@ const userData = () => {
     }
 
     const offlineLogin = async (email, password) => {
+        const transaction = await db.transaction('user', 'readwrite');
+        const store = await transaction.objectStore('user');
+        const real_email=await store.get("user_email");
+        const real_password=store.get("user_password");
 
+        if(real_email.value==email && bcrypt.compare(password,real_password.value)){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     return {
         setUserData,
-        getUserName
+        getUserName,
+        offlineLogin
     }
 
 }

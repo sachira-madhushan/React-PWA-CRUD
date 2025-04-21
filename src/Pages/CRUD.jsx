@@ -5,6 +5,7 @@ import usePostsIDB from "../indexedDB/usePosts";
 import idbPostCRUD from "../indexedDB/CRUD";
 import fetchAndStorePosts from "../indexedDB/fetchPosts&Store";
 import moment from "moment-timezone";
+import userData from "../indexedDB/userData";
 
 const CRUD = () => {
     const [posts, setPosts] = useState([]);
@@ -14,12 +15,15 @@ const CRUD = () => {
     const { postsIDB, allPostsIDB, getPostsIDB, addPostIDB, updatePostIDB, deletePostIDB, sync } = idbPostCRUD();
     const [syncStatusLocal, setSyncStatusLocal] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
-    const user = JSON.parse(localStorage.getItem('user'));
+    const {getUserName}=userData();
+    const [user_name,setUsername]=useState();
+    
+
     const [remaining, setRemaining] = useState(0);
 
     const logout = async () => {
         localStorage.clear();
-        indexedDB.deleteDatabase("postsDB");
+        // indexedDB.deleteDatabase("postsDB");
         window.location.reload()
     }
 
@@ -94,6 +98,9 @@ const CRUD = () => {
         // } catch (error) {
         //     console.error("Error fetching posts:", error);
         // }
+        const user = await getUserName();
+        setUsername(user.value);
+
         const filteredPosts = allPostsIDB.filter(post => post.syncStatus !== 'synced');
         if (filteredPosts.length > 0) {
             setSyncStatusLocal(false);
@@ -218,7 +225,7 @@ const CRUD = () => {
             </div>
             <div>
                 <h1 className="text-2xl font-bold mb-4 float-left">PWA</h1>
-                <h1 className="text-2xl font-bold mb-4 float-right">Hello {user.name}!</h1>
+                <h1 className="text-2xl font-bold mb-4 float-right">Hello {user_name}!</h1>
                 <button type="button" className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 float-right mr-2" onClick={() => logout()}>Logout</button>
             </div>
             <div className="mb-6">
