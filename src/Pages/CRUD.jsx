@@ -23,20 +23,29 @@ const CRUD = () => {
         window.location.reload()
     }
 
-    setTimeout(() => {
-        const now = moment.tz("Asia/Colombo");
-        const startDate = localStorage.getItem("start_date");
 
-        const endDate = localStorage.getItem("expire_date");
 
-        const expire_date = moment.tz(endDate, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
-        const start_date = moment.tz(startDate, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
+    useEffect(() => {
 
-        const diffInMinutes = expire_date.diff(now, 'minutes');
+        setInterval(() => {
+            const now = moment.tz("Asia/Colombo");
+            const startDate = localStorage.getItem("start_date");
 
-        setRemaining(diffInMinutes);
+            const endDate = localStorage.getItem("expire_date");
 
-    }, 1000);
+            const expire_date = moment.tz(endDate, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
+            const start_date = moment.tz(startDate, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
+
+            if(now<start_date){
+                localStorage.clear();
+                window.location.reload();
+            }
+            const diffInMinutes = expire_date.diff(now, 'minutes');
+
+            setRemaining(diffInMinutes);
+
+        }, 1000);
+    }, [remaining]);
 
     function formatDuration(minutes) {
         const duration = moment.duration(minutes, 'minutes');
