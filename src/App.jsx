@@ -9,8 +9,8 @@ import Register from './Pages/auth/Register'
 function App() {
   const token= localStorage.getItem("token");
   const user= localStorage.getItem("user");
-  const start_date= localStorage.getItem("start_date");
-  const end_date= localStorage.getItem("expire_date");
+  const expire_date= localStorage.getItem("expire_date");
+  const last_sync= localStorage.getItem("last_sync");
 
   return (
     <BrowserRouter>
@@ -18,7 +18,7 @@ function App() {
         
         <Route path="/register" element={<Register />} />
         
-        {token&&user&&start_date&&end_date?
+        {token&&user&&expire_date&&last_sync?
           <Route path="/" element={<CRUD/>} />:<Route path="/" element={<Login />} />
         }
       </Routes>

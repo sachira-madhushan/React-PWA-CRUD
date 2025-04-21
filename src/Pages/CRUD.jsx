@@ -29,14 +29,14 @@ const CRUD = () => {
 
         setInterval(() => {
             const now = moment.tz("Asia/Colombo");
-            const startDate = localStorage.getItem("start_date");
+            const last_sync = localStorage.getItem("last_sync");
 
             const endDate = localStorage.getItem("expire_date");
 
             const expire_date = moment.tz(endDate, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
-            const start_date = moment.tz(startDate, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
+            const last_sync_formatted = moment.tz(last_sync, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
 
-            if(now<start_date){
+            if(now<last_sync_formatted){
                 localStorage.clear();
                 window.location.reload();
             }
