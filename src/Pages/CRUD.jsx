@@ -17,8 +17,10 @@ const CRUD = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const [remaining, setRemaining] = useState(0);
-
+    const [isOpen, setIsOpen] = useState(false);
     const user_name = localStorage.getItem("user_name");
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
 
     const logout = async () => {
         localStorage.clear();
@@ -26,8 +28,50 @@ const CRUD = () => {
         window.location.reload()
     }
 
+
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.post("http://localhost:4000/api/v1/auth/login", {
+                email: email,
+                password: password,
+            }, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                }
+            });
+
+            if (response.status === 200) {
+
+                if (response.data.user.status == 1) {
+                    alert("Successfully verified!");
+                    localStorage.setItem("token", response.data.token);
+                    try {
+
+                        await setUserData(response.data.expire_date, response.data.last_sync, response.data.user.name, response.data.user.email, password);
+
+                    } catch (error) {
+                        console.log(error);
+                    }
+                } else {
+                    alert("Your account is not activated yet. Please contact admin.");
+                }
+            }
+            else {
+                alert("Invalid credentials. Please try again.");
+            }
+
+        } catch (error) {
+            alert("Invalid credentials. Please try again.");
+        }
+
+        setIsOpen(false);
+    };
+
     useEffect(() => {
-        
+
         setInterval(() => {
             const timer = async () => {
                 const now = moment.tz("Asia/Colombo");
@@ -115,11 +159,17 @@ const CRUD = () => {
         if (isOffline) {
             alert("You are offline. Please connect to the internet to sync.");
         } else {
-            setIsLoading(true);
-            await sync()
-            setIsLoading(false)
-            setSyncStatusLocal(true);
-            fetchPosts();
+            const token = localStorage.getItem("token");
+            if (token) {
+                setIsLoading(true);
+                await sync()
+                setIsLoading(false)
+                setSyncStatusLocal(true);
+                fetchPosts();
+            } else {
+                setIsOpen(true);
+            }
+
         }
 
     }
@@ -198,6 +248,59 @@ const CRUD = () => {
                     </div>
                 ))}
             </div>
+            {isOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+                        <h2 className="text-2xl font-semibold mb-4 text-center">Verify to Sync</h2>
+
+                        <form onSubmit={handleLogin} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1" htmlFor="email">
+                                    Email
+                                </label>
+                                <input
+                                    id="email"
+                                    type="email"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1" htmlFor="password">
+                                    Password
+                                </label>
+                                <input
+                                    id="password"
+                                    type="password"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                            </div>
+
+                            <div className="flex justify-between items-center">
+                                <button
+                                    type="submit"
+                                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                                >
+                                    Verify
+                                </button>
+                                <button
+                                    type="button"
+                                    className="text-gray-500 hover:text-gray-700"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
