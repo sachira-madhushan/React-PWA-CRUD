@@ -18,7 +18,7 @@ const Login = () => {
         if (name) {
             const result=await offlineLogin(email,password);
             if(result){
-                localStorage.setItem("is_user_loggedin",true);
+                localStorage.setItem("user_login","true");
                 alert("Login success!");
                 window.location.reload();
             }else{
@@ -41,11 +41,12 @@ const Login = () => {
 
                         if (response.data.user.status == 1) {
                             alert("Login successful!");
+                            localStorage.setItem("user_login","true");
                             localStorage.setItem("token", response.data.token);
                             localStorage.setItem("user", JSON.stringify(response.data.user));
                             localStorage.setItem("expire_date", JSON.stringify(response.data.expire_date));
                             localStorage.setItem("last_sync", JSON.stringify(response.data.last_sync));
-                            localStorage.setItem("is_user_loggedin",true);
+
                             try {
 
                                 await setUserData(response.data.expire_date,response.data.last_sync,response.data.user.name,response.data.user.email,password);
