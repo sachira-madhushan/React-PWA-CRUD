@@ -6,6 +6,7 @@ import idbPostCRUD from "../indexedDB/CRUD";
 import fetchAndStorePosts from "../indexedDB/fetchPosts&Store";
 import moment from "moment-timezone";
 import useUserData from "../indexedDB/userData";
+import config from "../configs/config";
 
 const CRUD = () => {
     const [posts, setPosts] = useState([]);
@@ -29,15 +30,17 @@ const CRUD = () => {
     }
 
 
-
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post("http://localhost:4000/api/v1/auth/login", {
+            const response = await axios.post(config.URL + "/api/v1/auth/login", {
                 email: email,
                 password: password,
             }, {
                 headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+                    "Access-Control-Allow-Headers": "*",
                     "Content-Type": "application/json",
                     "Accept": "application/json",
                 }

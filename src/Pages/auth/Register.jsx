@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import config from "../../configs/config";
 const Register = () => {
     const [formData, setFormData] = useState({
         name: "",
@@ -20,32 +21,34 @@ const Register = () => {
 
     const registerUser = async () => {
         const { name, email, password } = formData;
-        if(navigator.onLine){
+        if (navigator.onLine) {
             try {
-                const response = await axios.post("http://localhost:4000/api/v1/auth/register", {
-                    name:name,
-                    email:email,
-                    password:password,
+                const response = await axios.post(config.URL + "/api/v1/auth/register", {
+                    name: name,
+                    email: email,
+                    password: password,
                 }, {
                     headers: {
-    
+                        "Access-Control-Allow-Origin": "*",
+                        "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+                        "Access-Control-Allow-Headers": "*",
                         "Content-Type": "application/json",
                         "Accept": "application/json",
                     }
                 });
-    
-                if(response.status === 201) {
+
+                if (response.status === 201) {
                     alert("Registration successful! Please login.");
-                    window.location.href="/";
+                    window.location.href = "/";
                 }
                 else {
                     alert("Registration failed. Please try again.");
                 }
-                
+
             } catch (error) {
                 alert("Error while registering");
             }
-        }else{
+        } else {
             alert("Go online to register")
         }
     }

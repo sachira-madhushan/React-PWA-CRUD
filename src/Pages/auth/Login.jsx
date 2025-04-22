@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import userData from "../../indexedDB/userData";
+import config from "../../configs/config";
+
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const { setUserData, getUserName,offlineLogin } = userData();
+    const { setUserData, getUserName, offlineLogin } = userData();
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -16,22 +18,25 @@ const Login = () => {
         const name = await getUserName();
 
         if (name) {
-            const result=await offlineLogin(email,password);
-            if(result){
-                localStorage.setItem("user_login","true");
+            const result = await offlineLogin(email, password);
+            if (result) {
+                localStorage.setItem("user_login", "true");
                 alert("Login success!");
                 window.location.reload();
-            }else{
+            } else {
                 alert("Invalid credentials. Please try again.")
             }
         } else {
             if (navigator.onLine) {
                 try {
-                    const response = await axios.post("http://localhost:4000/api/v1/auth/login", {
+                    const response = await axios.post(config.URL + "/api/v1/auth/login", {
                         email: email,
                         password: password,
                     }, {
                         headers: {
+                            "Access-Control-Allow-Origin": "*",
+                            "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+                            "Access-Control-Allow-Headers": "*",
                             "Content-Type": "application/json",
                             "Accept": "application/json",
                         }
@@ -41,7 +46,7 @@ const Login = () => {
 
                         if (response.data.user.status == 1) {
                             alert("Login successful!");
-                            localStorage.setItem("user_login","true");
+                            localStorage.setItem("user_login", "true");
                             localStorage.setItem("token", response.data.token);
                             // localStorage.setItem("user", JSON.stringify(response.data.user));
                             // localStorage.setItem("expire_date", JSON.stringify(response.data.expire_date));
@@ -49,8 +54,8 @@ const Login = () => {
 
                             try {
 
-                                await setUserData(response.data.expire_date,response.data.last_sync,response.data.user.name,response.data.user.email,password);
-                                
+                                await setUserData(response.data.expire_date, response.data.last_sync, response.data.user.name, response.data.user.email, password);
+
                             } catch (error) {
                                 console.log(error);
                             }

@@ -1,11 +1,15 @@
 import initDB from './../db/IndexedDB';
 import axios from 'axios'
+import config from '../configs/config';
 const fetchAndStorePosts = async () => {
 
   try {
-    const response = await axios.get("http://localhost:4000/api/v1/posts/",
+    const response = await axios.get(config.URL + "/api/v1/posts/",
       {
         headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+          "Access-Control-Allow-Headers": "*",
           "Content-Type": "application/json",
           "Accept": "application/json",
           "Authorization": `Bearer ${localStorage.getItem('token')}`,

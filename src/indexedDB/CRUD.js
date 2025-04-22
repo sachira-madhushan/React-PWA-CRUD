@@ -3,13 +3,13 @@ import initDB from '../db/IndexedDB';
 import axios from 'axios';
 import fetchAndStorePosts from './fetchPosts&Store';
 import userData from './userData'
-
+import config from '../configs/config';
 const idbPostCRUD = () => {
     const [postsIDB, setPosts] = useState([]);
     const [allPostsIDB, setAllPostsIDB] = useState([]);
     const [db, setDb] = useState(null);
     const [syncStatus, setSyncStatus] = useState(false);
-    const {setLastSyncDate}=userData();
+    const { setLastSyncDate } = userData();
 
     useEffect(() => {
         const initializeDB = async () => {
@@ -66,12 +66,15 @@ const idbPostCRUD = () => {
     const sync = async () => {
 
         try {
-            const response = await axios.post("http://localhost:4000/api/v1/posts/sync", {
+            const response = await axios.post(config.URL + "/api/v1/posts/sync", {
                 posts: allPostsIDB
             },
 
                 {
                     headers: {
+                        "Access-Control-Allow-Origin": "*",
+                        "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+                        "Access-Control-Allow-Headers": "*",
                         "Content-Type": "application/json",
                         "Accept": "application/json",
                         "Authorization": `Bearer ${localStorage.getItem('token')}`,
@@ -83,7 +86,7 @@ const idbPostCRUD = () => {
                 await getPostsIDB();
                 alert("Successfully sync with cloud")
                 setLastSyncDate(response.data.last_sync);
-            }else{
+            } else {
                 alert("Error while syncing posts with cloud");
             }
 
