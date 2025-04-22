@@ -5,6 +5,10 @@ import bcrypt from 'bcryptjs';
 const useUserData = () => {
     const [dbInstance, setDbInstance] = useState(null);
 
+    const [user_name, setUsername] = useState();
+    const [expireDate, setExpireDate] = useState();
+    const [last_sync, setLastSync] = useState();
+
     useEffect(() => {
         const initializeDB = async () => {
             const db = await openDB('userDB', 1, {
@@ -14,13 +18,30 @@ const useUserData = () => {
                     }
                 }
             });
+
             setDbInstance(db);
+            await loadData(db);
         };
 
         initializeDB();
-    }, []);
+    }, [user_name,expireDate,last_sync]);
 
-    // Wait until DB is ready
+    const loadData = async (db) => {
+        const name = await getItem("user_name", db);
+        const expirationDate = await getItem("expire_date", db);
+        const lastSyncDate = await getItem("last_sync", db);
+
+        setUsername(name);
+        setExpireDate(expirationDate);
+        setLastSync(lastSyncDate);
+
+        if(name&&expirationDate,lastSyncDate){
+            localStorage.setItem("user_name",name);
+            localStorage.setItem("expire_date",expirationDate);
+            localStorage.setItem("last_sync",lastSyncDate);
+        }
+    };
+
     const waitForDB = async () => {
         while (!dbInstance) {
             await new Promise(resolve => setTimeout(resolve, 100));
@@ -44,17 +65,22 @@ const useUserData = () => {
             await store.put({ key: "user_password", value: hashed_password });
 
             await transaction.done;
+
+            // Update state after successful write
+            setUsername(user_name);
+            setExpireDate(expire_date);
+            setLastSync(last_sync);
         } catch (error) {
             alert("Error saving data: " + error);
         }
     };
 
-    const getItem = async (key) => {
-        const db = await waitForDB();
-        const transaction = db.transaction('user', 'readonly');
+    const getItem = async (key, db) => {
+        const currentDB = db || await waitForDB();
+        const transaction = currentDB.transaction('user', 'readonly');
         const store = transaction.objectStore('user');
         const result = await store.get(key);
-        return result?.value || null;
+        return result?.value ?? null;
     };
 
     const getUserName = async () => {
@@ -69,8 +95,9 @@ const useUserData = () => {
         const real_email = await getItem("user_email");
         const real_password = await getItem("user_password");
 
-        const passwordMatch = await bcrypt.compare(password, real_password);
+        if (!real_email || !real_password) return false;
 
+        const passwordMatch = await bcrypt.compare(password, real_password);
         return real_email === email && passwordMatch;
     };
 
@@ -80,15 +107,20 @@ const useUserData = () => {
         const store = transaction.objectStore('user');
 
         await store.put({ key: "last_sync", value: last_sync });
-
         await transaction.done;
-    }
 
-    const getLastSyncDate=async()=>{
-        return await getItem("expire_date");
-    }
+        // Also update state
+        setLastSync(last_sync);
+    };
+
+    const getLastSyncDate = async () => {
+        return await getItem("last_sync");
+    };
 
     return {
+        user_name,
+        expireDate,
+        last_sync,
         setUserData,
         getUserName,
         getExpireDate,

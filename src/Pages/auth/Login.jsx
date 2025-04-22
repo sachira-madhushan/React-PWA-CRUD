@@ -67,7 +67,7 @@ const Login = () => {
                     alert("Invalid credentials. Please try again.");
                 }
             } else {
-                alert("Please login online")
+                alert("Go online to login")
             }
 
 

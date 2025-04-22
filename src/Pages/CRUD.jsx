@@ -5,22 +5,20 @@ import usePostsIDB from "../indexedDB/usePosts";
 import idbPostCRUD from "../indexedDB/CRUD";
 import fetchAndStorePosts from "../indexedDB/fetchPosts&Store";
 import moment from "moment-timezone";
-import userData from "../indexedDB/userData";
+import useUserData from "../indexedDB/userData";
 
 const CRUD = () => {
     const [posts, setPosts] = useState([]);
     const [title, setTitle] = useState("");
     const [body, setBody] = useState("");
-    const { postsFromIDB, isOffline } = usePostsIDB();
-    const { postsIDB, allPostsIDB, getPostsIDB, addPostIDB, updatePostIDB, deletePostIDB, sync } = idbPostCRUD();
+    const { isOffline } = usePostsIDB();
+    const { postsIDB, allPostsIDB, addPostIDB, deletePostIDB, sync } = idbPostCRUD();
     const [syncStatusLocal, setSyncStatusLocal] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
-    const { getUserName,getExpireDate,getLastSyncDate} = userData();
 
-    const [user_name, setUsername] = useState();
-    const [expireDate,setExpireDate]=useState();
     const [remaining, setRemaining] = useState(0);
-    const [last_sync,setLastSync]=useState();
+
+    const user_name = localStorage.getItem("user_name");
 
     const logout = async () => {
         localStorage.clear();
@@ -28,16 +26,18 @@ const CRUD = () => {
         window.location.reload()
     }
 
-
-
     useEffect(() => {
-        
+
+
         setInterval(() => {
             const timer = async () => {
                 const now = moment.tz("Asia/Colombo");
-                // const last_sync = localStorage.getItem("last_sync");
 
-                const expire_date =moment.tz(expireDate, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
+                const last_sync = localStorage.getItem("last_sync");
+                const expireDate = localStorage.getItem("expire_date");
+
+                const expire_date = moment.tz(expireDate, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
+
                 const last_sync_formatted = moment.tz(last_sync, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
 
                 if (now < last_sync_formatted || expire_date < now) {
@@ -74,6 +74,7 @@ const CRUD = () => {
         }, 1000);
     }, [remaining]);
 
+
     function formatDuration(minutes) {
         const duration = moment.duration(minutes, 'minutes');
 
@@ -88,28 +89,6 @@ const CRUD = () => {
 
 
     const fetchPosts = async () => {
-        // try {
-        //     const response = await axios.get("http://localhost:4000/posts", {
-        //         headers: {
-
-        //             "Content-Type": "application/json",
-        //             "Accept": "application/json",
-        //         }
-        //     });
-        //     setPosts(response.data);
-        //     console.log(response.data);
-        // } catch (error) {
-        //     console.error("Error fetching posts:", error);
-        // }
-        const user = await getUserName();
-        setUsername(user);
-
-        const expire_date=await getExpireDate();
-        setExpireDate(expire_date);
-
-        const last_sync_date=await getLastSyncDate();
-        setLastSync(last_sync_date);
-
         const filteredPosts = allPostsIDB.filter(post => post.syncStatus !== 'synced');
         if (filteredPosts.length > 0) {
             setSyncStatusLocal(false);
@@ -120,36 +99,12 @@ const CRUD = () => {
     };
 
     const createPost = async () => {
-        // try {
-        //     const response = await axios.post("http://localhost:4000/posts", {
-        //         title:title,
-        //         body:body,
-        //     }, {
-        //         headers: {
-
-        //             "Content-Type": "application/json",
-        //             "Accept": "application/json",
-        //         }
-        //     });
-        //     setPosts([response.data, ...posts]);
-        //     setTitle("");
-        //     setBody("");
-        // } catch (error) {
-        //     console.error("Error creating post:", error);
-        // }
-
         setSyncStatusLocal(false);
         addPostIDB({ title, body });
 
     };
 
     const deletePost = async (id) => {
-        // try {
-        //     await axios.delete(`http://localhost:4000/posts/${id}`);
-        //     setPosts(posts.filter((post) => post.id !== id));
-        // } catch (error) {
-        //     console.error("Error deleting post:", error);
-        // }
         setSyncStatusLocal(false);
         deletePostIDB(id);
         console.log(posts, postsIDB);
@@ -167,41 +122,7 @@ const CRUD = () => {
             setSyncStatusLocal(true);
             fetchPosts();
         }
-        // if (!isOffline) {
-        //     try {
-        //         const response = await axios.post("http://localhost:4000/posts/sync", {
-        //             posts:postsIDB
-        //         },
-
-        //             {
-        //                 headers: {
-        //                     "Content-Type": "application/json",
-        //                     "Accept": "application/json",
-        //                 }
-        //             });
-        //         if(response.status==200){
-        //             console.log(response.data);
-        //             //await fetchAndStorePosts();
-        //             // await getPostsIDB();
-        //             // await setPosts(postsIDB);
-        //             //setSyncStatusLocal(true);
-        //             // setPosts(response.data.posts);
-        //             alert("Successfully sync with cloud")
-        //         }else{
-        //             alert("Error while syncing")
-        //         }
-
-        //         console.log(response.data);
-        //     } catch (error) {
-        //         console.error("Error fetching posts:", error);
-        //     } finally {
-        //         setIsLoading(false);
-
-        //     }
-
-        // } else {
-
-        // }
+        
     }
 
     useEffect(() => {
@@ -231,6 +152,7 @@ const CRUD = () => {
             }
             <div>
                 <h1 className="">{formatDuration(remaining)}</h1>
+
             </div>
             <div>
                 <h1 className="text-2xl font-bold mb-4 float-left">PWA</h1>
