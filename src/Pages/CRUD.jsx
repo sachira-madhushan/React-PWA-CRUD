@@ -15,10 +15,12 @@ const CRUD = () => {
     const { postsIDB, allPostsIDB, getPostsIDB, addPostIDB, updatePostIDB, deletePostIDB, sync } = idbPostCRUD();
     const [syncStatusLocal, setSyncStatusLocal] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
-    const { getUserName,getExpireDate } = userData();
+    const { getUserName,getExpireDate,getLastSyncDate} = userData();
+
     const [user_name, setUsername] = useState();
     const [expireDate,setExpireDate]=useState();
     const [remaining, setRemaining] = useState(0);
+    const [last_sync,setLastSync]=useState();
 
     const logout = async () => {
         localStorage.clear();
@@ -33,9 +35,9 @@ const CRUD = () => {
         setInterval(() => {
             const timer = async () => {
                 const now = moment.tz("Asia/Colombo");
-                const last_sync = localStorage.getItem("last_sync");
+                // const last_sync = localStorage.getItem("last_sync");
 
-                const expire_date =await moment.tz(expireDate, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
+                const expire_date =moment.tz(expireDate, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
                 const last_sync_formatted = moment.tz(last_sync, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
 
                 if (now < last_sync_formatted || expire_date < now) {
@@ -105,6 +107,8 @@ const CRUD = () => {
         const expire_date=await getExpireDate();
         setExpireDate(expire_date);
 
+        const last_sync_date=await getLastSyncDate();
+        setLastSync(last_sync_date);
 
         const filteredPosts = allPostsIDB.filter(post => post.syncStatus !== 'synced');
         if (filteredPosts.length > 0) {

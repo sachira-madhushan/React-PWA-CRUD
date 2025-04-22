@@ -20,29 +20,33 @@ const Register = () => {
 
     const registerUser = async () => {
         const { name, email, password } = formData;
-        try {
-            const response = await axios.post("http://localhost:4000/api/v1/auth/register", {
-                name:name,
-                email:email,
-                password:password,
-            }, {
-                headers: {
-
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
+        if(navigator.onLine){
+            try {
+                const response = await axios.post("http://localhost:4000/api/v1/auth/register", {
+                    name:name,
+                    email:email,
+                    password:password,
+                }, {
+                    headers: {
+    
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                    }
+                });
+    
+                if(response.status === 201) {
+                    alert("Registration successful! Please login.");
+                    window.location.href="/";
                 }
-            });
-
-            if(response.status === 201) {
-                alert("Registration successful! Please login.");
-                window.location.href="/";
+                else {
+                    alert("Registration failed. Please try again.");
+                }
+                
+            } catch (error) {
+                alert("Error while registering");
             }
-            else {
-                alert("Registration failed. Please try again.");
-            }
-            
-        } catch (error) {
-            alert("Error while registering");
+        }else{
+            alert("Go online to register")
         }
     }
 

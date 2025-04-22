@@ -2,12 +2,14 @@ import { use, useEffect, useState } from 'react';
 import initDB from '../db/IndexedDB';
 import axios from 'axios';
 import fetchAndStorePosts from './fetchPosts&Store';
+import userData from './userData'
 
 const idbPostCRUD = () => {
     const [postsIDB, setPosts] = useState([]);
     const [allPostsIDB, setAllPostsIDB] = useState([]);
     const [db, setDb] = useState(null);
     const [syncStatus, setSyncStatus] = useState(false);
+    const {setLastSyncDate}=userData();
 
     useEffect(() => {
         const initializeDB = async () => {
@@ -80,13 +82,14 @@ const idbPostCRUD = () => {
                 await fetchAndStorePosts();
                 await getPostsIDB();
                 alert("Successfully sync with cloud")
+                setLastSyncDate(response.data.last_sync);
             }else{
                 alert("Error while syncing posts with cloud");
             }
 
         } catch (error) {
             alert("Your account has been deactivated. Please contact admin to reactivate.");
-            localStorage.clear();
+            // localStorage.clear();
             window.location.reload();
         }
 

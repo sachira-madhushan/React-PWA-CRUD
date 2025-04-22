@@ -1,6 +1,10 @@
 import initDB from './../db/IndexedDB';
 import axios from 'axios';
+import userData from './userData';
+
 const fetchAndStorePosts = async () => {
+  const {setLastSyncDate}=userData();
+
   try {
     const response = await axios.get("http://localhost:4000/api/v1/posts/",
       {
@@ -16,7 +20,8 @@ const fetchAndStorePosts = async () => {
 
     const transaction = db.transaction('posts', 'readwrite');
     const store = transaction.objectStore('posts');
-    localStorage.setItem("last_sync",response.data.last_sync)
+    // localStorage.setItem("last_sync",response.data.last_sync)
+    setLastSyncDate(response.data.last_sync)
     store.clear();
     posts.forEach(post => {
       post.syncStatus = 'synced';
