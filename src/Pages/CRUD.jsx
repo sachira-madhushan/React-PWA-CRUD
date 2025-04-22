@@ -27,8 +27,7 @@ const CRUD = () => {
     }
 
     useEffect(() => {
-
-
+        
         setInterval(() => {
             const timer = async () => {
                 const now = moment.tz("Asia/Colombo");
@@ -122,7 +121,7 @@ const CRUD = () => {
             setSyncStatusLocal(true);
             fetchPosts();
         }
-        
+
     }
 
     useEffect(() => {
