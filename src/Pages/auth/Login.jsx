@@ -8,7 +8,6 @@ const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const { setUserData, getUserName, offlineLogin } = userData();
-
     const handleSubmit = (e) => {
         e.preventDefault();
         login();
@@ -17,7 +16,7 @@ const Login = () => {
     const login = async () => {
         const name = await getUserName();
 
-        if (name) {
+        if (name && !navigator.onLine) {
             const result = await offlineLogin(email, password);
             if (result) {
                 localStorage.setItem("user_login", "true");
@@ -34,9 +33,6 @@ const Login = () => {
                         password: password,
                     }, {
                         headers: {
-                            "Access-Control-Allow-Origin": "*",
-                            "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
-                            "Access-Control-Allow-Headers": "*",
                             "Content-Type": "application/json",
                             "Accept": "application/json",
                         }

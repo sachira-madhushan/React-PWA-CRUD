@@ -1,5 +1,5 @@
 const config = {
-    URL: "https://react-pwa-crud-backend-1pag.onrender.com",
+    URL: "https://react-pwa-crud-backend-auth.onrender.com",
 };
 
 export default config;

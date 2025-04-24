@@ -12,6 +12,7 @@ const initDB = async () => {
       }
     },
   });
+  
   return db;
 };
 

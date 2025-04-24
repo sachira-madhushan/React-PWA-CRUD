@@ -29,9 +29,6 @@ const Register = () => {
                     password: password,
                 }, {
                     headers: {
-                        "Access-Control-Allow-Origin": "*",
-                        "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
-                        "Access-Control-Allow-Headers": "*",
                         "Content-Type": "application/json",
                         "Accept": "application/json",
                     }
