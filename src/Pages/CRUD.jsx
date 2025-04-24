@@ -25,7 +25,6 @@ const CRUD = () => {
 
     const logout = async () => {
         localStorage.clear();
-        // indexedDB.deleteDatabase("postsDB");
         window.location.reload()
     }
 
@@ -85,6 +84,8 @@ const CRUD = () => {
 
                 if (now < last_sync_formatted || expire_date < now) {
                     localStorage.clear();
+                    localStorage.setItem("package_expired",1)
+                    indexedDB.deleteDatabase("usersDB");
                     window.location.reload();
                 }
 
