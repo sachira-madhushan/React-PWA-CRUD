@@ -22,14 +22,32 @@ const CRUD = () => {
     const user_name = localStorage.getItem("user_name");
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [isBackupOpen, setIsBackupOpen] = useState(false);
 
-    const {backupIndexedDB} =useBackup();
+    const { backupIndexedDB, restoreIndexedDB } = useBackup();
+
+    const [selectedFile, setSelectedFile] = useState(null);
 
     const logout = async () => {
         localStorage.clear();
         window.location.reload()
     }
+    const handleFileSelect = (e) => {
+        const file = e.target.files[0];
+        if (file && file.type === 'application/json') {
+            const filenameRegex = /^posts-backup-\d{4}-\d{2}-\d{2} \d{2}_\d{2}_\d{2}\.json$/;
 
+            if (!filenameRegex.test(file.name)) {
+                alert('Please select a valid backup file.');
+                return;
+            }
+
+            setSelectedFile(file);
+
+        } else {
+            alert('Please select a valid backup file.');
+        }
+    };
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -86,7 +104,7 @@ const CRUD = () => {
 
                 if (now < last_sync_formatted || expire_date < now) {
                     localStorage.clear();
-                    localStorage.setItem("package_expired",1)
+                    localStorage.setItem("package_expired", 1)
                     indexedDB.deleteDatabase("usersDB");
                     window.location.reload();
                 }
@@ -202,15 +220,14 @@ const CRUD = () => {
                     </div>
                 )
             }
-            <div className="bg-green-50 p-2 overflow-hidden">
-                <div  className="float-end">
-                    <button type="button" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onClick={()=>backupIndexedDB()}>Backup</button>
-                    <button type="button" className="bg-green-500 text-white px-4 py-2 mx-2 rounded hover:bg-green-600">Restore Backup</button>
+            <div className="bg-green-100 rounded p-2 mb-2 overflow-hidden">
+                <div className="float-start">
+                    <h1 className="pt-2 pl-2 text-green-800">{formatDuration(remaining)}</h1>
                 </div>
-            </div>
-            <div>
-                <h1 className="">{formatDuration(remaining)}</h1>
-
+                <div className="float-end">
+                    <button type="button" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onClick={() => backupIndexedDB()}>Backup</button>
+                    <button type="button" className="bg-green-500 text-white px-4 py-2 mx-2 rounded hover:bg-green-600" onClick={() => setIsBackupOpen(true)}>Restore Backup</button>
+                </div>
             </div>
             <div>
                 <h1 className="text-2xl font-bold mb-4 float-left">PWA</h1>
@@ -302,6 +319,42 @@ const CRUD = () => {
                                     type="button"
                                     className="text-gray-500 hover:text-gray-700"
                                     onClick={() => setIsOpen(false)}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {isBackupOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+                        <h2 className="text-2xl font-semibold mb-4 text-center">Restore Backup</h2>
+
+                        <form onSubmit={() => restoreIndexedDB(selectedFile)} className="space-y-4">
+                            <div>
+                                <input
+                                    type="file"
+                                    id="restore-json"
+                                    accept="application/json"
+
+                                    onChange={handleFileSelect}
+                                />
+                            </div>
+                            <div className="flex justify-between items-center">
+
+                                <button
+                                    type="submit"
+                                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                                >
+                                    Restore
+                                </button>
+                                <button
+                                    type="button"
+                                    className="text-gray-500 hover:text-gray-700"
+                                    onClick={() => setIsBackupOpen(false)}
                                 >
                                     Cancel
                                 </button>
