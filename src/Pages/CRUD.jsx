@@ -7,7 +7,7 @@ import fetchAndStorePosts from "../indexedDB/fetchPosts&Store";
 import moment from "moment-timezone";
 import useUserData from "../indexedDB/userData";
 import config from "../configs/config";
-
+import useBackup from '../indexedDB/backup'
 const CRUD = () => {
     const [posts, setPosts] = useState([]);
     const [title, setTitle] = useState("");
@@ -22,6 +22,8 @@ const CRUD = () => {
     const user_name = localStorage.getItem("user_name");
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+
+    const {backupIndexedDB} =useBackup();
 
     const logout = async () => {
         localStorage.clear();
@@ -202,7 +204,7 @@ const CRUD = () => {
             }
             <div className="bg-green-50 p-2 overflow-hidden">
                 <div  className="float-end">
-                    <button type="button" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Backup</button>
+                    <button type="button" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onClick={()=>backupIndexedDB()}>Backup</button>
                     <button type="button" className="bg-green-500 text-white px-4 py-2 mx-2 rounded hover:bg-green-600">Restore Backup</button>
                 </div>
             </div>

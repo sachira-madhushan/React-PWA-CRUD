@@ -30,4 +30,4 @@ const useBackup = () => {
     }
 }
 
-module.exports=useBackup
+export default useBackup
