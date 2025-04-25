@@ -8,7 +8,7 @@ import { BrowserRouter,Routes,Route } from 'react-router-dom'
 import Register from './Pages/auth/Register'
 function App() {
   const user= localStorage.getItem("user_login");
-
+  
   return (
     <BrowserRouter>
       <Routes>

@@ -220,9 +220,9 @@ const CRUD = () => {
                     </div>
                 )
             }
-            <div className="bg-green-100 rounded p-2 mb-2 overflow-hidden">
+            <div className="bg-green-100 rounded p-2 mb-2 overflow-auto">
                 <div className="float-start">
-                    <h1 className="pt-2 pl-2 text-green-800">{formatDuration(remaining)}</h1>
+                    <h1 className="pl-2 text-green-800">{formatDuration(remaining)}</h1>
                 </div>
                 <div className="float-end">
                     <button type="button" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onClick={() => backupIndexedDB()}>Backup</button>

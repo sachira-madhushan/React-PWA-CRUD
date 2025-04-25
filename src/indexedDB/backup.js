@@ -22,7 +22,7 @@ const useBackup = () => {
         a.download = 'posts-backup-' + date_time + '.json';
         a.click();
 
-        alert("Backup successfull!")
+        alert("Backup successfull!\nBackup saved to the downloads.")
     };
 
     const restoreIndexedDB = async (file) => {
