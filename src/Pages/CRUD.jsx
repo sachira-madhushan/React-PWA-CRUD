@@ -28,6 +28,8 @@ const CRUD = () => {
 
     const [selectedFile, setSelectedFile] = useState(null);
 
+    const [role, setRole] = useState(localStorage.getItem("ROLE"));
+
     const logout = async () => {
         localStorage.clear();
         window.location.reload()
@@ -90,8 +92,9 @@ const CRUD = () => {
     };
 
     useEffect(() => {
-
+        setRole(localStorage.getItem("ROLE"));
         setInterval(() => {
+
             const timer = async () => {
                 const now = moment.tz("Asia/Colombo");
 
@@ -222,7 +225,7 @@ const CRUD = () => {
             }
             <div className="bg-green-100 rounded p-2 mb-2 overflow-auto">
                 <div className="float-start">
-                    <h1 className="pl-2 text-green-800">{formatDuration(remaining)}</h1>
+                    <h1 className="pl-2 text-green-800">{formatDuration(remaining) + " " + role}</h1>
                 </div>
                 <div className="float-end">
                     <button type="button" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onClick={() => backupIndexedDB()}>Backup</button>
