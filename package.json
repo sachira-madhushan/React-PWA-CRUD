@@ -12,8 +12,10 @@
   "dependencies": {
     "axios": "^1.8.4",
     "bcryptjs": "^3.0.2",
+    "dgram": "^1.0.1",
     "idb": "^8.0.2",
     "moment-timezone": "^0.5.48",
+    "os": "^0.1.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-pwa": "file:",
