@@ -4,6 +4,7 @@ import axios from 'axios';
 import fetchAndStorePosts from './fetchPosts&Store';
 import userData from './userData'
 import config from '../configs/config';
+import moment from 'moment-timezone';
 const idbPostCRUD = () => {
     const [postsIDB, setPosts] = useState([]);
     const [allPostsIDB, setAllPostsIDB] = useState([]);
@@ -34,6 +35,8 @@ const idbPostCRUD = () => {
 
     const addPostIDB = async (post) => {
         post.syncStatus = 'pending';
+        post.created_at = moment().format("YYYY-MM-DD HH:mm:ss");
+        post.updated_at = moment().format("YYYY-MM-DD HH:mm:ss");
         if (db) {
             await db.add('posts', post);
             getPostsIDB();
@@ -54,6 +57,7 @@ const idbPostCRUD = () => {
 
             if (post) {
                 post.syncStatus = 'deleted';
+                post.updated_at = moment().format("YYYY-MM-DD HH:mm:ss");
                 await db.put('posts', post);
 
                 getPostsIDB();

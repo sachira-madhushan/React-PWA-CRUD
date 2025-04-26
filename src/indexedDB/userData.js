@@ -109,7 +109,6 @@ const useUserData = () => {
         await store.put({ key: "last_sync", value: last_sync });
         await transaction.done;
 
-        // Also update state
         setLastSync(last_sync);
     };
 

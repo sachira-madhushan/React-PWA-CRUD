@@ -30,6 +30,10 @@ const CRUD = () => {
 
     const [role, setRole] = useState(localStorage.getItem("ROLE"));
 
+
+    const {setLastSyncDate} =useUserData();
+
+
     const logout = async () => {
         localStorage.clear();
         window.location.reload()
@@ -94,7 +98,7 @@ const CRUD = () => {
     useEffect(() => {
         setRole(localStorage.getItem("ROLE"));
         setInterval(() => {
-
+            
             const timer = async () => {
                 const now = moment.tz("Asia/Colombo");
 
@@ -106,10 +110,13 @@ const CRUD = () => {
                 const last_sync_formatted = moment.tz(last_sync, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
 
                 if (now < last_sync_formatted || expire_date < now) {
+                    alert("Your system time has been changed. Please correct your system time and login.")
                     localStorage.clear();
                     localStorage.setItem("package_expired", 1)
                     indexedDB.deleteDatabase("usersDB");
                     window.location.reload();
+                }else{
+                    setLastSyncDate(moment().format("YYYY-MM-DD HH:mm:ss"));
                 }
 
 
@@ -225,7 +232,10 @@ const CRUD = () => {
             }
             <div className="bg-green-100 rounded p-2 mb-2 overflow-auto">
                 <div className="float-start">
-                    <h1 className="pl-2 text-green-800">{formatDuration(remaining) + " " + role}</h1>
+                    <div>
+                    <h1 className="pl-2 pt-2 text-green-800">{formatDuration(remaining) + " "}</h1> 
+                    <h1 className="pl-2 text-red-800 bg-red-100 rounded">{"Role :"+role}</h1>
+                    </div>
                 </div>
                 <div className="float-end">
                     <button type="button" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onClick={() => backupIndexedDB()}>Backup</button>
