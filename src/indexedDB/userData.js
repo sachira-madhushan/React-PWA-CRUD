@@ -105,10 +105,12 @@ const useUserData = () => {
         const real_email = await getItem("user_email");
         const real_password = await getItem("user_password");
 
-        const decrypted_password=await decryptText()
+        const decrypted_password=decryptPassword(real_password,real_email);
+
         if (!real_email || !real_password) return false;
 
-        const passwordMatch = await bcrypt.compare(password, real_password);
+        const passwordMatch = password===decryptPassword;
+        
         return real_email === email && passwordMatch;
     };
 
