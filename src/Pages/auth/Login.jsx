@@ -28,7 +28,6 @@ const Login = () => {
                 if (expired && expired == 1) {
                     alert("Your package has been expired. Please contact admin to reactivate.")
                 } else {
-
                     alert("Invalid credentials. Please try again.")
                 }
             }
@@ -79,10 +78,6 @@ const Login = () => {
             } else {
                 alert("Go online to login")
             }
-
-
-
-
 
         }
 

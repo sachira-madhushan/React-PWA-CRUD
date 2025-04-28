@@ -19,7 +19,6 @@ const useUserData = () => {
                     }
                 }
             });
-
             setDbInstance(db);
             await loadData(db);
         };

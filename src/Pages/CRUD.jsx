@@ -94,7 +94,7 @@ const CRUD = () => {
                 alert("Invalid credentials. Please try again.");
             }
 
-        } catch (error) {
+        }catch (error) {
             alert("Invalid credentials. Please try again.");
         }
 
@@ -153,6 +153,14 @@ const CRUD = () => {
         }, 1000);
     }, [remaining]);
 
+
+
+    useEffect(() => {
+        setInterval(() => {
+            const token=localStorage.getItem("token");
+
+        },5000);
+    }, []);
 
     function formatDuration(minutes) {
         const duration = moment.duration(minutes, 'minutes');
