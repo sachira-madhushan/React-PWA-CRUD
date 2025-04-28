@@ -106,11 +106,12 @@ const useUserData = () => {
         const real_password = await getItem("user_password");
 
         const decrypted_password=decryptPassword(real_password,real_email);
+        console.log(decrypted_password,real_email,real_password);
 
         if (!real_email || !real_password) return false;
 
-        const passwordMatch = password===decryptPassword;
-        
+        const passwordMatch = password===decrypted_password;
+
         return real_email === email && passwordMatch;
     };
 
