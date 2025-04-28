@@ -15,8 +15,9 @@ const Login = () => {
 
     const login = async () => {
         const name = await getUserName();
+        const package_type=localStorage.getItem("package_expired");
 
-        if (name && !navigator.onLine) {
+        if (name &&!package_type&& navigator.onLine) {
             const result = await offlineLogin(email, password);
             if (result) {
                 localStorage.setItem("user_login", "true");
@@ -58,7 +59,7 @@ const Login = () => {
 
                             try {
 
-                                await setUserData(response.data.expire_date, response.data.last_sync, response.data.user.name, response.data.user.email, password);
+                                await setUserData(response.data.expire_date, response.data.last_sync, response.data.user.name, response.data.user.email, password,response.data.package_type);
 
                             } catch (error) {
                                 console.log(error);

@@ -32,11 +32,16 @@ const CRUD = () => {
     const [role, setRole] = useState(localStorage.getItem("ROLE"));
 
 
-    const {setLastSyncDate} =useUserData();
+    const { setLastSyncDate } = useUserData();
 
 
     const logout = async () => {
-        localStorage.clear();
+        localStorage.removeItem("user_name");
+        localStorage.removeItem("expire_date");
+        localStorage.removeItem("last_sync");
+        localStorage.removeItem("package_type");
+        localStorage.removeItem("user_login");
+        localStorage.removeItem("token");
         window.location.reload()
     }
     const handleFileSelect = (e) => {
@@ -76,8 +81,8 @@ const CRUD = () => {
                     localStorage.setItem("token", response.data.token);
                     try {
 
-                        await setUserData(response.data.expire_date, response.data.last_sync, response.data.user.name, response.data.user.email, password,response.package_type);
-                        
+                        await setUserData(response.data.expire_date, response.data.last_sync, response.data.user.name, response.data.user.email, password, response.package_type);
+
                     } catch (error) {
                         console.log(error);
                     }
@@ -115,7 +120,7 @@ const CRUD = () => {
                     localStorage.setItem("package_expired", 1)
                     indexedDB.deleteDatabase("usersDB");
                     window.location.reload();
-                }else{
+                } else {
                     setLastSyncDate(moment().format("YYYY-MM-DD HH:mm:ss"));
                 }
 
@@ -211,13 +216,13 @@ const CRUD = () => {
 
     return (
         <div className="p-6 max-w-4xl mx-auto">
-            {isOffline&&package_type==1 && (
+            {isOffline && package_type == 1 && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
                     <span className="block sm:inline"> You are currently offline.</span>
                 </div>
             )}
             {
-                !syncStatusLocal &&package_type==1 && (
+                !syncStatusLocal && package_type == 1 && (
                     <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-4 rounded mb-4" role="alert">
                         <span className="block sm:inline">There are some unsynced Data please sync.</span>
 
@@ -233,8 +238,8 @@ const CRUD = () => {
             <div className="bg-green-100 rounded p-2 mb-2 overflow-auto">
                 <div className="float-start">
                     <div>
-                    <h1 className="pl-2 pt-2 text-green-800">{formatDuration(remaining) + " "}</h1> 
-                    <h1 className="pl-2 text-red-800 bg-red-100 rounded">{"Role :"+role}</h1>
+                        <h1 className="pl-2 pt-2 text-green-800">{formatDuration(remaining) + " "}</h1>
+                        <h1 className="pl-2 text-red-800 bg-red-100 rounded">{"Role :" + role}</h1>
                     </div>
                 </div>
                 <div className="float-end">

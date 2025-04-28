@@ -8,6 +8,7 @@ const useUserData = () => {
     const [user_name, setUsername] = useState();
     const [expireDate, setExpireDate] = useState();
     const [last_sync, setLastSync] = useState();
+    const [packageType, setPackageType] = useState();
 
     useEffect(() => {
         const initializeDB = async () => {
@@ -35,12 +36,13 @@ const useUserData = () => {
         setUsername(name);
         setExpireDate(expirationDate);
         setLastSync(lastSyncDate);
+        setPackageType(package_type);
 
         if (name && expirationDate, lastSyncDate,package_type) {
             localStorage.setItem("user_name", name);
             localStorage.setItem("expire_date", expirationDate);
             localStorage.setItem("last_sync", lastSyncDate);
-            localStorage.setItem("package_type", package_type);
+            localStorage.setItem("package_type", packageType);
         }
     };
 
@@ -131,7 +133,7 @@ const useUserData = () => {
         offlineLogin,
         setLastSyncDate,
         getLastSyncDate,
-        getPackageType
+        getPackageType,
     };
 };
 
