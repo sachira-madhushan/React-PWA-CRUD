@@ -30,15 +30,17 @@ const useUserData = () => {
         const name = await getItem("user_name", db);
         const expirationDate = await getItem("expire_date", db);
         const lastSyncDate = await getItem("last_sync", db);
+        const package_type = await getItem("package_type", db);
 
         setUsername(name);
         setExpireDate(expirationDate);
         setLastSync(lastSyncDate);
 
-        if (name && expirationDate, lastSyncDate) {
+        if (name && expirationDate, lastSyncDate,package_type) {
             localStorage.setItem("user_name", name);
             localStorage.setItem("expire_date", expirationDate);
             localStorage.setItem("last_sync", lastSyncDate);
+            localStorage.setItem("package_type", package_type);
         }
     };
 

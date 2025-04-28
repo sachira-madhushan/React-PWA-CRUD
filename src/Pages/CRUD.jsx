@@ -20,6 +20,7 @@ const CRUD = () => {
     const [remaining, setRemaining] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     const user_name = localStorage.getItem("user_name");
+    const package_type = localStorage.getItem("package_type");
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isBackupOpen, setIsBackupOpen] = useState(false);
@@ -76,7 +77,7 @@ const CRUD = () => {
                     try {
 
                         await setUserData(response.data.expire_date, response.data.last_sync, response.data.user.name, response.data.user.email, password,response.package_type);
-
+                        
                     } catch (error) {
                         console.log(error);
                     }
@@ -98,7 +99,6 @@ const CRUD = () => {
     useEffect(() => {
         setRole(localStorage.getItem("ROLE"));
         setInterval(() => {
-            
             const timer = async () => {
                 const now = moment.tz("Asia/Colombo");
 
@@ -211,13 +211,13 @@ const CRUD = () => {
 
     return (
         <div className="p-6 max-w-4xl mx-auto">
-            {isOffline && (
+            {isOffline&&package_type==1 && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
                     <span className="block sm:inline"> You are currently offline.</span>
                 </div>
             )}
             {
-                !syncStatusLocal && (
+                !syncStatusLocal &&package_type==1 && (
                     <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-4 rounded mb-4" role="alert">
                         <span className="block sm:inline">There are some unsynced Data please sync.</span>
 
