@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { openDB } from "idb";
 import bcrypt from 'bcryptjs';
+import { decryptPassword,encryptPassword } from "../security/encrypt";
 
 const useUserData = () => {
     const [dbInstance, setDbInstance] = useState(null);
@@ -58,20 +59,23 @@ const useUserData = () => {
             const transaction = db.transaction('user', 'readwrite');
             const store = transaction.objectStore('user');
 
-            const salt = bcrypt.genSaltSync(10);
-            const hashed_password = bcrypt.hashSync(user_password, salt);
+            // const salt = bcrypt.genSaltSync(10);
+            // const hashed_password = bcrypt.hashSync(user_password, salt);
+
+            const encrypted_password=encryptPassword(user_password,user_email);
 
             await store.put({ key: "expire_date", value: expire_date });
             await store.put({ key: "last_sync", value: last_sync });
             await store.put({ key: "user_name", value: user_name });
             await store.put({ key: "user_email", value: user_email });
-            await store.put({ key: "user_password", value: hashed_password });
+            await store.put({ key: "user_password", value: encrypted_password });
             await store.put({ key: "package_type", value: package_type });
 
             await transaction.done;
             setUsername(user_name);
             setExpireDate(expire_date);
             setLastSync(last_sync);
+            
         } catch (error) {
             alert("Error saving data: " + error);
         }
@@ -101,6 +105,7 @@ const useUserData = () => {
         const real_email = await getItem("user_email");
         const real_password = await getItem("user_password");
 
+        const decrypted_password=await decryptText()
         if (!real_email || !real_password) return false;
 
         const passwordMatch = await bcrypt.compare(password, real_password);
