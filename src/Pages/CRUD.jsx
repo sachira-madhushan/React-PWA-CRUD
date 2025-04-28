@@ -36,10 +36,10 @@ const CRUD = () => {
 
 
     const logout = async () => {
-        localStorage.removeItem("user_name");
-        localStorage.removeItem("expire_date");
-        localStorage.removeItem("last_sync");
-        localStorage.removeItem("package_type");
+        // localStorage.removeItem("user_name");
+        // localStorage.removeItem("expire_date");
+        // localStorage.removeItem("last_sync");
+        // localStorage.removeItem("package_type");
         localStorage.removeItem("user_login");
         localStorage.removeItem("token");
         window.location.reload()
