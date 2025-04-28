@@ -17,7 +17,8 @@ const usePostsIDB = () => {
     };
 
     if (navigator.onLine) {
-      fetchAndStorePosts();
+      // fetchAndStorePosts();
+      getPostsFromDB();
       setIsOffline(false);
     } else {
       getPostsFromDB();

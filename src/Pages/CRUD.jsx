@@ -75,7 +75,7 @@ const CRUD = () => {
                     localStorage.setItem("token", response.data.token);
                     try {
 
-                        await setUserData(response.data.expire_date, response.data.last_sync, response.data.user.name, response.data.user.email, password);
+                        await setUserData(response.data.expire_date, response.data.last_sync, response.data.user.name, response.data.user.email, password,response.package_type);
 
                     } catch (error) {
                         console.log(error);

@@ -24,7 +24,7 @@ const useUserData = () => {
         };
 
         initializeDB();
-    }, [user_name,expireDate,last_sync]);
+    }, [user_name, expireDate, last_sync]);
 
     const loadData = async (db) => {
         const name = await getItem("user_name", db);
@@ -35,10 +35,10 @@ const useUserData = () => {
         setExpireDate(expirationDate);
         setLastSync(lastSyncDate);
 
-        if(name&&expirationDate,lastSyncDate){
-            localStorage.setItem("user_name",name);
-            localStorage.setItem("expire_date",expirationDate);
-            localStorage.setItem("last_sync",lastSyncDate);
+        if (name && expirationDate, lastSyncDate) {
+            localStorage.setItem("user_name", name);
+            localStorage.setItem("expire_date", expirationDate);
+            localStorage.setItem("last_sync", lastSyncDate);
         }
     };
 
@@ -49,7 +49,7 @@ const useUserData = () => {
         return dbInstance;
     };
 
-    const setUserData = async (expire_date, last_sync, user_name, user_email, user_password) => {
+    const setUserData = async (expire_date, last_sync, user_name, user_email, user_password, package_type) => {
         try {
             const db = await waitForDB();
             const transaction = db.transaction('user', 'readwrite');
@@ -63,10 +63,9 @@ const useUserData = () => {
             await store.put({ key: "user_name", value: user_name });
             await store.put({ key: "user_email", value: user_email });
             await store.put({ key: "user_password", value: hashed_password });
+            await store.put({ key: "package_type", value: package_type });
 
             await transaction.done;
-
-            // Update state after successful write
             setUsername(user_name);
             setExpireDate(expire_date);
             setLastSync(last_sync);
@@ -89,6 +88,10 @@ const useUserData = () => {
 
     const getExpireDate = async () => {
         return await getItem("expire_date");
+    };
+
+    const getPackageType = async () => {
+        return await getItem("package_type");
     };
 
     const offlineLogin = async (email, password) => {
@@ -125,7 +128,8 @@ const useUserData = () => {
         getExpireDate,
         offlineLogin,
         setLastSyncDate,
-        getLastSyncDate
+        getLastSyncDate,
+        getPackageType
     };
 };
 
