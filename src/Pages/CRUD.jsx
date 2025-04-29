@@ -32,7 +32,7 @@ const CRUD = () => {
     const [role, setRole] = useState(localStorage.getItem("ROLE"));
 
 
-    const { setLastSyncDate } = useUserData();
+    const { setLastSyncDate,verifyBeforeSync } = useUserData();
 
 
     const logout = async () => {
@@ -94,7 +94,7 @@ const CRUD = () => {
                 alert("Invalid credentials. Please try again.");
             }
 
-        }catch (error) {
+        } catch (error) {
             alert("Invalid credentials. Please try again.");
         }
 
@@ -156,11 +156,38 @@ const CRUD = () => {
 
 
     useEffect(() => {
-        setInterval(() => {
-            const token=localStorage.getItem("token");
 
-        },5000);
-    }, []);
+
+        const intervalId = setInterval(() => {
+        
+            const autoSync = async () => {
+                console.log("called")
+                // if (package_type != 1) return;
+                console.log("Package online")
+                const token = localStorage.getItem("token");
+                setIsLoading(true);
+    
+                if (token) {
+                    
+                    console.log("Token is available");
+                    await sync();
+                    setSyncStatusLocal(true);
+                } else {
+                    console.log("Token generated");
+                    await verifyBeforeSync();
+                    await sync();
+                }
+    
+                setIsLoading(false);
+                fetchPosts();
+            };
+    
+            autoSync();
+        }, 15000);
+    
+        return () => clearInterval(intervalId);
+    }, [package_type]);
+    
 
     function formatDuration(minutes) {
         const duration = moment.duration(minutes, 'minutes');
@@ -230,16 +257,16 @@ const CRUD = () => {
                 </div>
             )}
             {
-                !syncStatusLocal && package_type == 1 && (
+                isLoading && package_type == 1 && (
                     <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-4 rounded mb-4" role="alert">
-                        <span className="block sm:inline">There are some unsynced Data please sync.</span>
+                        <span className="block sm:inline">Your posts are auto syncing to the cloud...</span>
 
-                        <button
+                        {/* <button
                             onClick={() => syncToCloud()}
                             className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 float-right"
                         >
                             {isLoading ? "Syncing..." : "Sync"}
-                        </button>
+                        </button> */}
                     </div>
                 )
             }

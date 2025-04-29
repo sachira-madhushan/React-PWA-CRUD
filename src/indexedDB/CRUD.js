@@ -92,9 +92,10 @@ const idbPostCRUD = () => {
             }
 
         } catch (error) {
-            alert("Your account has been deactivated. Please contact admin to reactivate.");
-            // localStorage.clear();
-            window.location.reload();
+            // alert("Your account has been deactivated. Please contact admin to reactivate.");
+            // // localStorage.clear();
+            // window.location.reload();
+            console.log(error);
         }
 
     }
