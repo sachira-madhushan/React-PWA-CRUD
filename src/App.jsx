@@ -11,22 +11,27 @@ function App() {
   const user = localStorage.getItem("user_login");
 
   useEffect(() => {
-    if (window.electron) {
-      window.electron.onHostIP((ip) => {
-        console.log('Received Host IP from Electron:', ip);
-        localStorage.setItem("IP", ip);
-      });
-  
-      window.electron.onRole((role) => {
-        console.log('Role determined by Electron:', role);
-        localStorage.setItem("ROLE", role);
-      });
-  
-      console.log('Electron bridge is working!');
-    } else {
-      console.log('No Electron bridge found.');
-    }
+    const onHostIP = (e) => {
+      const ip = e.detail;
+      console.log("Host IP received from Electron:", ip);
+      localStorage.setItem("IP", ip);
+    };
+
+    const onRole = (e) => {
+      const role = e.detail;
+      console.log("Role received from Electron:", role);
+      localStorage.setItem("ROLE", role);
+    };
+
+    window.addEventListener('host-ip', onHostIP);
+    window.addEventListener('role', onRole);
+
+    return () => {
+      window.removeEventListener('host-ip', onHostIP);
+      window.removeEventListener('role', onRole);
+    };
   }, []);
+
   
   return (
     <BrowserRouter>
