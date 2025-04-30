@@ -100,8 +100,18 @@ const Login = () => {
                 }
 
             }
-        }else{
-            
+        }else if(role=="client"){
+            const response = await axios.post(config.LOCAL_HOST + "/login", {
+                email: email,
+                password: password,
+            }, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                }
+            });
+
+            alert("Login with localhost"+response.data.message);
         }
 
     }

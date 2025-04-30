@@ -31,7 +31,7 @@ const CRUD = () => {
     const { setLastSyncDate, verifyBeforeSync } = useUserData();
 
 
-    const {allUsersIDB,addUserIDB } = localUserDB();
+    const { allUsersIDB, addUserIDB } = localUserDB();
 
     const [localUsers, setLocalUsers] = useState([]);
 
@@ -105,24 +105,26 @@ const CRUD = () => {
     }, [remaining]);
 
     useEffect(() => {
-        const intervalId = setInterval(() => {
-            const autoSync = async () => {
-                const token = localStorage.getItem("token");
-                setIsLoading(true);
-                if (token) {
-                    await sync();
-                    setSyncStatusLocal(true);
-                } else {
-                    await verifyBeforeSync();
-                    await sync();
-                }
-                setIsLoading(false);
-                fetchPosts();
-            };
-            autoSync();
-        }, 30000);
-
-        return () => clearInterval(intervalId);
+        if(role=="host"){
+            const intervalId = setInterval(() => {
+                const autoSync = async () => {
+                    const token = localStorage.getItem("token");
+                    setIsLoading(true);
+                    if (token) {
+                        await sync();
+                        setSyncStatusLocal(true);
+                    } else {
+                        await verifyBeforeSync();
+                        await sync();
+                    }
+                    setIsLoading(false);
+                    fetchPosts();
+                };
+                autoSync();
+            }, 30000);
+    
+            return () => clearInterval(intervalId);
+        }
     }, [package_type]);
 
     const formatDuration = (minutes) => {
@@ -136,24 +138,34 @@ const CRUD = () => {
     };
 
     const fetchPosts = async () => {
-        const filteredPosts = allPostsIDB.filter(post => post.syncStatus !== 'synced');
-        if (filteredPosts.length > 0) setSyncStatusLocal(false);
-        setPosts(postsIDB);
-        setLocalUsers(allUsersIDB);
+        if (role == "host") {
+            const filteredPosts = allPostsIDB.filter(post => post.syncStatus !== 'synced');
+            if (filteredPosts.length > 0) setSyncStatusLocal(false);
+            setPosts(postsIDB);
+            setLocalUsers(allUsersIDB);
+        }
+
     };
 
     const createPost = async () => {
-        setSyncStatusLocal(false);
-        addPostIDB({ title, body });
+        if (role == "host") {
+
+            setSyncStatusLocal(false);
+            addPostIDB({ title, body });
+        }
     };
 
     const deletePost = async (id) => {
-        setSyncStatusLocal(false);
-        deletePostIDB(id);
+        if (role == "host") {
+            setSyncStatusLocal(false);
+            deletePostIDB(id);
+        }
     };
 
-    const addUser = async() => {
-        await addUserIDB({name: newUserName, email: newUserEmail, role: newUserRole, password: newUserPassword});
+    const addUser = async () => {
+        if (role == "host") {
+            await addUserIDB({ name: newUserName, email: newUserEmail, role: newUserRole, password: newUserPassword });
+        }
     }
 
     const manageUsers = () => {
@@ -184,10 +196,14 @@ const CRUD = () => {
                     <h1 className="pl-2 pt-2 text-green-800">{formatDuration(remaining) + " "}</h1>
                     <h1 className="pl-2 text-red-800 bg-red-100 rounded">{"Role :" + role}</h1>
                 </div>
-                <div className="float-end">
-                    <button type="button" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onClick={() => backupIndexedDB()}>Backup</button>
-                    <button type="button" className="bg-green-500 text-white px-4 py-2 mx-2 rounded hover:bg-green-600" onClick={() => setIsBackupOpen(true)}>Restore Backup</button>
-                </div>
+                {
+                    role == "host" && (
+                        <div className="float-end">
+                            <button type="button" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onClick={() => backupIndexedDB()}>Backup</button>
+                            <button type="button" className="bg-green-500 text-white px-4 py-2 mx-2 rounded hover:bg-green-600" onClick={() => setIsBackupOpen(true)}>Restore Backup</button>
+                        </div>
+                    )
+                }
             </div>
 
             <div>
@@ -196,7 +212,7 @@ const CRUD = () => {
                 <button type="button" className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 float-right mr-2" onClick={logout}>Logout</button>
                 {
                     // This must be equlas to the host to manage the users
-                    role !== "host" && (
+                    role == "host" && (
 
                         <button type="button" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 float-right mr-2" onClick={manageUsers}>Manage Users</button>
 
@@ -245,22 +261,26 @@ const CRUD = () => {
                                     onChange={handleFileSelect}
                                 />
                             </div>
-                            <div className="flex justify-between items-center">
+                            {
+                                role === "host" && (
+                                    <div className="flex justify-between items-center">
 
-                                <button
-                                    type="submit"
-                                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
-                                >
-                                    Restore
-                                </button>
-                                <button
-                                    type="button"
-                                    className="text-gray-500 hover:text-gray-700"
-                                    onClick={() => setIsBackupOpen(false)}
-                                >
-                                    Cancel
-                                </button>
-                            </div>
+                                        <button
+                                            type="submit"
+                                            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                                        >
+                                            Restore
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="text-gray-500 hover:text-gray-700"
+                                            onClick={() => setIsBackupOpen(false)}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                )
+                            }
                         </form>
                     </div>
                 </div>
