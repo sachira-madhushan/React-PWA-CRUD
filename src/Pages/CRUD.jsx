@@ -7,6 +7,7 @@ import moment from "moment-timezone";
 import useUserData from "../indexedDB/userData";
 import config from "../configs/config";
 import useBackup from "../indexedDB/backup";
+import localUserDB from "../indexedDB/localUserDB";
 
 const CRUD = () => {
     const [posts, setPosts] = useState([]);
@@ -30,7 +31,18 @@ const CRUD = () => {
     const { setLastSyncDate, verifyBeforeSync } = useUserData();
 
 
-    const [isOpenManageUsersModel,setOpenManageUsersModel]=useState(false)
+    const {allUsersIDB,addUserIDB } = localUserDB();
+
+    const [localUsers, setLocalUsers] = useState([]);
+
+    const [newUserName, setNewUserName] = useState("");
+    const [newUserEmail, setNewUserEmail] = useState("");
+    const [newUserRole, setNewUserRole] = useState("");
+    const [newUserPassword, setNewUserPassword] = useState("");
+
+
+
+    const [isOpenManageUsersModel, setOpenManageUsersModel] = useState(false)
 
     const logout = () => {
         // localStorage.removeItem("user_login");
@@ -53,40 +65,8 @@ const CRUD = () => {
         }
     };
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await axios.post(config.URL + "/api/v1/auth/login", {
-                email,
-                password,
-            }, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                }
-            });
-
-            if (response.status === 200 && response.data.user.status === 1) {
-                alert("Successfully verified!");
-                localStorage.setItem("token", response.data.token);
-                await setUserData(
-                    response.data.expire_date,
-                    response.data.last_sync,
-                    response.data.user.name,
-                    response.data.user.email,
-                    password,
-                    response.package_type
-                );
-            } else {
-                alert("Your account is not activated yet. Please contact admin.");
-            }
-        } catch {
-            alert("Invalid credentials. Please try again.");
-        }
-        setIsOpen(false);
-    };
-
     useEffect(() => {
+        setLocalUsers(allUsersIDB);
         setRole(sessionStorage.getItem("ROLE"));
         const interval = setInterval(() => {
             const roleFromLocalStorage = sessionStorage.getItem("ROLE");
@@ -159,6 +139,7 @@ const CRUD = () => {
         const filteredPosts = allPostsIDB.filter(post => post.syncStatus !== 'synced');
         if (filteredPosts.length > 0) setSyncStatusLocal(false);
         setPosts(postsIDB);
+        setLocalUsers(allUsersIDB);
     };
 
     const createPost = async () => {
@@ -171,24 +152,11 @@ const CRUD = () => {
         deletePostIDB(id);
     };
 
-    const syncToCloud = async () => {
-        if (isOffline) {
-            alert("You are offline. Please connect to the internet to sync.");
-        } else {
-            const token = localStorage.getItem("token");
-            if (token) {
-                setIsLoading(true);
-                await sync();
-                setIsLoading(false);
-                setSyncStatusLocal(true);
-                fetchPosts();
-            } else {
-                setIsOpen(true);
-            }
-        }
-    };
+    const addUser = async() => {
+        await addUserIDB({name: newUserName, email: newUserEmail, role: newUserRole, password: newUserPassword});
+    }
 
-    const manageUsers =()=>{
+    const manageUsers = () => {
         setOpenManageUsersModel(true);
     }
 
@@ -231,7 +199,7 @@ const CRUD = () => {
                     role !== "host" && (
 
                         <button type="button" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 float-right mr-2" onClick={manageUsers}>Manage Users</button>
-                        
+
                     )
                 }
             </div>
@@ -292,6 +260,55 @@ const CRUD = () => {
                                 >
                                     Cancel
                                 </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {isOpenManageUsersModel && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+                        <h2 className="text-2xl font-semibold mb-4 text-center">Add new user</h2>
+
+                        <form onSubmit={() => addUser()} className="space-y-4">
+                            <div className="">
+                                <input type="text" className="w-full border rounded p-2 mb-2" placeholder="Username" onChange={(e) => setNewUserName(e.target.value)} />
+                                <input type="text" className="w-full border rounded p-2 mb-2" placeholder="Email" onChange={(e) => setNewUserEmail(e.target.value)} />
+                                <input type="text" className="w-full border rounded p-2 mb-2" placeholder="Role" onChange={(e) => setNewUserRole(e.target.value)} />
+                                <input type="text" className="w-full border rounded p-2 mb-2" placeholder="Password" onChange={(e) => setNewUserPassword(e.target.value)} />
+                            </div>
+                            <div className="flex justify-between items-center">
+
+                                <button
+                                    type="submit"
+                                    className="bg-green-600 w-full mr-2 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                                >
+                                    Add
+                                </button>
+                                <button
+                                    type="button"
+                                    className="text-gray-500 hover:text-gray-700"
+                                    onClick={() => setOpenManageUsersModel(false)}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                            <div>
+                                {
+                                    localUsers.map((user, index) => (
+                                        <div className="border rounded ">
+                                            <div className="p-2">
+                                                <h1>Username : {user.name}</h1>
+                                                <h1>Email : {user.email}</h1>
+                                                <h1>Role : {user.role}</h1>
+                                                <h1>Password : {user.password}</h1>
+                                            </div>
+
+                                        </div>
+                                    ))
+                                }
+
                             </div>
                         </form>
                     </div>
