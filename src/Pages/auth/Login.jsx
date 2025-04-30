@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import userData from "../../indexedDB/userData";
@@ -8,16 +8,33 @@ const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const { setUserData, getUserName, offlineLogin } = userData();
+    const [role, setRole] = useState(null);
+
     const handleSubmit = (e) => {
         e.preventDefault();
         login();
     };
 
+
+    useEffect(() => {
+
+        const interval = setInterval(() => {
+            const value = sessionStorage.getItem('ROLE');
+            if (value) {
+                setRole(value);
+                clearInterval(interval);
+            }
+        }, 100);
+
+        return () => clearInterval(interval);
+
+    }, []);
+
     const login = async () => {
         const name = await getUserName();
-        const package_type=localStorage.getItem("package_expired");
+        const package_type = localStorage.getItem("package_expired");
 
-        if (name &&!package_type&& navigator.onLine) {
+        if (name && !package_type && navigator.onLine) {
             const result = await offlineLogin(email, password);
             if (result) {
                 // localStorage.setItem("user_login", "true");
@@ -60,7 +77,7 @@ const Login = () => {
 
                             try {
 
-                                await setUserData(response.data.expire_date, response.data.last_sync, response.data.user.name, response.data.user.email, password,response.data.package_type);
+                                await setUserData(response.data.expire_date, response.data.last_sync, response.data.user.name, response.data.user.email, password, response.data.package_type);
 
                             } catch (error) {
                                 console.log(error);
@@ -116,12 +133,26 @@ const Login = () => {
                             className="w-full px-3 py-2 mt-1 border rounded-md focus:outline-none focus:ring focus:ring-blue-300"
                         />
                     </div>
-                    <button
-                        type="submit"
-                        className="w-full px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
-                    >
-                        Login
-                    </button>
+                    {
+                        //this must be change to !role in production removed for testing
+                        role ? (
+                            <button
+                                disabled
+                                type="submit"
+                                className="w-full px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+                            >
+                                Please wait...
+                            </button>
+                        ) : (
+                            <button
+                                type="submit"
+                                className="w-full px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+                            >
+                                Login as {role}
+                            </button>
+                        )
+                    }
+
                 </form>
                 <p className="text-sm text-center text-gray-600">
                     Don't have an account?{" "}

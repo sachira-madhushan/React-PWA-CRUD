@@ -15,13 +15,15 @@ function App() {
     const onHostIP = (e) => {
       const ip = e.detail;
       console.log("Host IP received from Electron:", ip);
-      localStorage.setItem("IP", ip);
+      // localStorage.setItem("IP", ip);
+      sessionStorage.setItem("IP", ip);
     };
 
     const onRole = (e) => {
       const role = e.detail;
       console.log("Role received from Electron:", role);
-      localStorage.setItem("ROLE", role);
+      // localStorage.setItem("ROLE", role);
+      sessionStorage.setItem("ROLE", role);
     };
 
     window.addEventListener('host-ip', onHostIP);

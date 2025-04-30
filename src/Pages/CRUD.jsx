@@ -84,9 +84,9 @@ const CRUD = () => {
     };
 
     useEffect(() => {
-        setRole(localStorage.getItem("ROLE"));
+        setRole(sessionStorage.getItem("ROLE"));
         const interval = setInterval(() => {
-            const roleFromLocalStorage = localStorage.getItem("ROLE");
+            const roleFromLocalStorage = sessionStorage.getItem("ROLE");
             if (!roleFromLocalStorage) {
                 setRole(roleFromLocalStorage);
             }
