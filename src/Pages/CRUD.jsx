@@ -30,7 +30,8 @@ const CRUD = () => {
     const { setLastSyncDate, verifyBeforeSync } = useUserData();
 
     const logout = () => {
-        localStorage.removeItem("user_login");
+        // localStorage.removeItem("user_login");
+        sessionStorage.removeItem("user_login");
         localStorage.removeItem("token");
         window.location.reload();
     };

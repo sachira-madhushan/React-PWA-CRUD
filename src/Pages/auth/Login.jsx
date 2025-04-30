@@ -20,7 +20,8 @@ const Login = () => {
         if (name &&!package_type&& navigator.onLine) {
             const result = await offlineLogin(email, password);
             if (result) {
-                localStorage.setItem("user_login", "true");
+                // localStorage.setItem("user_login", "true");
+                sessionStorage.setItem("user_login", "true");
                 alert("Login success!");
                 window.location.reload();
             } else {
@@ -49,7 +50,8 @@ const Login = () => {
 
                         if (response.data.user.status == 1) {
                             alert("Login successful!");
-                            localStorage.setItem("user_login", "true");
+                            // localStorage.setItem("user_login", "true");
+                            sessionStorage.setItem("user_login", "true");
                             localStorage.setItem("token", response.data.token);
                             localStorage.removeItem("package_expired");
                             // localStorage.setItem("user", JSON.stringify(response.data.user));
