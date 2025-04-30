@@ -31,73 +31,77 @@ const Login = () => {
     }, []);
 
     const login = async () => {
-        const name = await getUserName();
-        const package_type = localStorage.getItem("package_expired");
+        if (role == "host") {
+            const name = await getUserName();
+            const package_type = localStorage.getItem("package_expired");
 
-        if (name && !package_type && navigator.onLine) {
-            const result = await offlineLogin(email, password);
-            if (result) {
-                // localStorage.setItem("user_login", "true");
-                sessionStorage.setItem("user_login", "true");
-                alert("Login success!");
-                window.location.reload();
-            } else {
-                const expired = localStorage.getItem("package_expired");
-                if (expired && expired == 1) {
-                    alert("Your package has been expired. Please contact admin to reactivate.")
+            if (name && !package_type && navigator.onLine) {
+                const result = await offlineLogin(email, password);
+                if (result) {
+                    // localStorage.setItem("user_login", "true");
+                    sessionStorage.setItem("user_login", "true");
+                    alert("Login success!");
+                    window.location.reload();
                 } else {
-                    alert("Invalid credentials. Please try again.")
-                }
-            }
-        } else {
-
-            if (navigator.onLine) {
-                try {
-                    const response = await axios.post(config.URL + "/api/v1/auth/login", {
-                        email: email,
-                        password: password,
-                    }, {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Accept": "application/json",
-                        }
-                    });
-
-                    if (response.status === 200) {
-
-                        if (response.data.user.status == 1) {
-                            alert("Login successful!");
-                            // localStorage.setItem("user_login", "true");
-                            sessionStorage.setItem("user_login", "true");
-                            localStorage.setItem("token", response.data.token);
-                            localStorage.removeItem("package_expired");
-                            // localStorage.setItem("user", JSON.stringify(response.data.user));
-                            // localStorage.setItem("expire_date", JSON.stringify(response.data.expire_date));
-                            // localStorage.setItem("last_sync", JSON.stringify(response.data.last_sync));
-
-                            try {
-
-                                await setUserData(response.data.expire_date, response.data.last_sync, response.data.user.name, response.data.user.email, password, response.data.package_type);
-
-                            } catch (error) {
-                                console.log(error);
-                            }
-                        } else {
-                            alert("Your package is not activated yet. Please contact admin.");
-                        }
-                        window.location.href = "/";
+                    const expired = localStorage.getItem("package_expired");
+                    if (expired && expired == 1) {
+                        alert("Your package has been expired. Please contact admin to reactivate.")
+                    } else {
+                        alert("Invalid credentials. Please try again.")
                     }
-                    else {
+                }
+            } else {
+
+                if (navigator.onLine) {
+                    try {
+                        const response = await axios.post(config.URL + "/api/v1/auth/login", {
+                            email: email,
+                            password: password,
+                        }, {
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Accept": "application/json",
+                            }
+                        });
+
+                        if (response.status === 200) {
+
+                            if (response.data.user.status == 1) {
+                                alert("Login successful!");
+                                // localStorage.setItem("user_login", "true");
+                                sessionStorage.setItem("user_login", "true");
+                                localStorage.setItem("token", response.data.token);
+                                localStorage.removeItem("package_expired");
+                                // localStorage.setItem("user", JSON.stringify(response.data.user));
+                                // localStorage.setItem("expire_date", JSON.stringify(response.data.expire_date));
+                                // localStorage.setItem("last_sync", JSON.stringify(response.data.last_sync));
+
+                                try {
+
+                                    await setUserData(response.data.expire_date, response.data.last_sync, response.data.user.name, response.data.user.email, password, response.data.package_type);
+
+                                } catch (error) {
+                                    console.log(error);
+                                }
+                            } else {
+                                alert("Your package is not activated yet. Please contact admin.");
+                            }
+                            window.location.href = "/";
+                        }
+                        else {
+                            alert("Invalid credentials. Please try again.");
+                        }
+
+                    } catch (error) {
                         alert("Invalid credentials. Please try again.");
                     }
-
-                } catch (error) {
-                    alert("Invalid credentials. Please try again.");
+                } else {
+                    alert("Go online to login")
                 }
-            } else {
-                alert("Go online to login")
-            }
 
+            }
+        }else{
+            
         }
 
     }
