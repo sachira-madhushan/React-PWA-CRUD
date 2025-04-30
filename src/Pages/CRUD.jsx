@@ -29,6 +29,9 @@ const CRUD = () => {
     const { backupIndexedDB, restoreIndexedDB } = useBackup();
     const { setLastSyncDate, verifyBeforeSync } = useUserData();
 
+
+    const [isOpenManageUsersModel,setOpenManageUsersModel]=useState(false)
+
     const logout = () => {
         // localStorage.removeItem("user_login");
         sessionStorage.removeItem("user_login");
@@ -185,6 +188,10 @@ const CRUD = () => {
         }
     };
 
+    const manageUsers =()=>{
+        setOpenManageUsersModel(true);
+    }
+
     useEffect(() => {
         fetchPosts();
     }, [postsIDB]);
@@ -219,6 +226,14 @@ const CRUD = () => {
                 <h1 className="text-2xl font-bold mb-4 float-left">PWA</h1>
                 <h1 className="text-2xl font-bold mb-4 float-right">Hello {user_name}!</h1>
                 <button type="button" className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 float-right mr-2" onClick={logout}>Logout</button>
+                {
+                    // This must be equlas to the host to manage the users
+                    role !== "host" && (
+
+                        <button type="button" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 float-right mr-2" onClick={manageUsers}>Manage Users</button>
+                        
+                    )
+                }
             </div>
 
             <div className="mb-6">
@@ -247,6 +262,41 @@ const CRUD = () => {
                     </div>
                 ))}
             </div>
+            {isBackupOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+                        <h2 className="text-2xl font-semibold mb-4 text-center">Restore Backup</h2>
+
+                        <form onSubmit={() => restoreIndexedDB(selectedFile)} className="space-y-4">
+                            <div>
+                                <input
+                                    type="file"
+                                    id="restore-json"
+                                    accept="application/json"
+
+                                    onChange={handleFileSelect}
+                                />
+                            </div>
+                            <div className="flex justify-between items-center">
+
+                                <button
+                                    type="submit"
+                                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                                >
+                                    Restore
+                                </button>
+                                <button
+                                    type="button"
+                                    className="text-gray-500 hover:text-gray-700"
+                                    onClick={() => setIsBackupOpen(false)}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
