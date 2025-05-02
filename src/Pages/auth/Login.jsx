@@ -32,6 +32,11 @@ const Login = () => {
 
     const login = async () => {
         if (role == "host") {
+
+
+
+
+
             const name = await getUserName();
             const package_type = localStorage.getItem("package_expired");
 
@@ -50,6 +55,17 @@ const Login = () => {
                         alert("Invalid credentials. Please try again.")
                     }
                 }
+
+                const response = await axios.post(config.LOCAL_HOST + "/data", {
+                    expire_date:localStorage.getItem("expire_date")
+                }, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                    }
+                });
+
+
             } else {
 
                 if (navigator.onLine) {
@@ -80,6 +96,15 @@ const Login = () => {
 
                                     await setUserData(response.data.expire_date, response.data.last_sync, response.data.user.name, response.data.user.email, password, response.data.package_type);
 
+                                    const response = await axios.post(config.LOCAL_HOST + "/data", {
+                                        expire_date:localStorage.getItem("expire_date")
+                                    }, {
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                            "Accept": "application/json",
+                                        }
+                                    });
+
                                 } catch (error) {
                                     console.log(error);
                                 }
@@ -99,6 +124,7 @@ const Login = () => {
                     alert("Go online to login")
                 }
 
+
             }
         }else if(role=="client"){
             const response = await axios.post(config.LOCAL_HOST + "/login", {
@@ -111,7 +137,30 @@ const Login = () => {
                 }
             });
 
-            alert("Login with localhost"+response.data.message);
+            if (response.status === 200) {
+
+                if (response.data.user.status == 1) {
+                    alert("Login successful!");
+                    sessionStorage.setItem("user_login", "true");
+                    localStorage.setItem("token", response.data.token);
+                    localStorage.removeItem("package_expired");
+                    localStorage.setItem("user_role",response.data.user.role)
+
+                    try {
+
+                        await setUserData(response.data.expire_date, response.data.last_sync, response.data.user.name, response.data.user.email, password, response.data.package_type);
+
+                    } catch (error) {
+                        console.log(error);
+                    }
+                } else {
+                    alert("Invalied creadentials. Please try again.");
+                }
+                window.location.href = "/";
+            }
+            else {
+                alert("Invalid credentials. Please try again.");
+            }
         }
 
     }
@@ -149,7 +198,7 @@ const Login = () => {
                     </div>
                     {
                         //this must be change to !role in production removed for testing
-                        role ? (
+                        !role ? (
                             <button
                                 disabled
                                 type="submit"

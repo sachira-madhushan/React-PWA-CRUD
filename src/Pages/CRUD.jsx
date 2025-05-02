@@ -8,6 +8,7 @@ import useUserData from "../indexedDB/userData";
 import config from "../configs/config";
 import useBackup from "../indexedDB/backup";
 import localUserDB from "../indexedDB/localUserDB";
+import userManagement from "../local_server/userManagement";
 
 const CRUD = () => {
     const [posts, setPosts] = useState([]);
@@ -43,6 +44,9 @@ const CRUD = () => {
 
 
     const [isOpenManageUsersModel, setOpenManageUsersModel] = useState(false)
+
+
+    const {createUser,getUsers,users}=userManagement();
 
     const logout = () => {
         // localStorage.removeItem("user_login");
@@ -164,7 +168,7 @@ const CRUD = () => {
 
     const addUser = async () => {
         if (role == "host") {
-            await addUserIDB({ name: newUserName, email: newUserEmail, role: newUserRole, password: newUserPassword });
+            await createUser(newUserName, newUserEmail, newUserRole, newUserPassword);
         }
     }
 
@@ -316,7 +320,7 @@ const CRUD = () => {
                             </div>
                             <div>
                                 {
-                                    localUsers.map((user, index) => (
+                                    users.map((user, index) => (
                                         <div className="border rounded ">
                                             <div className="p-2">
                                                 <h1>Username : {user.name}</h1>
