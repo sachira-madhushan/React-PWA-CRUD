@@ -2,14 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import userData from "../../indexedDB/userData";
-import config from "../../configs/config";
+import getConfig from "../../configs/config";
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const { setUserData, getUserName, offlineLogin } = userData();
     const [role, setRole] = useState(null);
-
+    const config = getConfig();
+    
     const handleSubmit = (e) => {
         e.preventDefault();
         login();
@@ -32,15 +33,20 @@ const Login = () => {
 
     const login = async () => {
         if (role == "host") {
-
-
-
-
-
             const name = await getUserName();
             const package_type = localStorage.getItem("package_expired");
 
             if (name && !package_type && navigator.onLine) {
+
+                const response = await axios.post(config.LOCAL_HOST + "/api/data", {
+                    expire_date: localStorage.getItem("expire_date")
+                }, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                    }
+                });
+
                 const result = await offlineLogin(email, password);
                 if (result) {
                     // localStorage.setItem("user_login", "true");
@@ -56,14 +62,7 @@ const Login = () => {
                     }
                 }
 
-                const response = await axios.post(config.LOCAL_HOST + "/data", {
-                    expire_date:localStorage.getItem("expire_date")
-                }, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Accept": "application/json",
-                    }
-                });
+
 
 
             } else {
@@ -96,8 +95,8 @@ const Login = () => {
 
                                     await setUserData(response.data.expire_date, response.data.last_sync, response.data.user.name, response.data.user.email, password, response.data.package_type);
 
-                                    const response = await axios.post(config.LOCAL_HOST + "/data", {
-                                        expire_date:localStorage.getItem("expire_date")
+                                    const response = await axios.post(config.LOCAL_HOST + "/api/data", {
+                                        expire_date: localStorage.getItem("expire_date")
                                     }, {
                                         headers: {
                                             "Content-Type": "application/json",
@@ -126,8 +125,8 @@ const Login = () => {
 
 
             }
-        }else if(role=="client"){
-            const response = await axios.post(config.LOCAL_HOST + "/login", {
+        } else if (role == "client") {
+            const response = await axios.post(config.LOCAL_HOST + "/api/users/login", {
                 email: email,
                 password: password,
             }, {
@@ -139,24 +138,19 @@ const Login = () => {
 
             if (response.status === 200) {
 
-                if (response.data.user.status == 1) {
-                    alert("Login successful!");
-                    sessionStorage.setItem("user_login", "true");
-                    localStorage.setItem("token", response.data.token);
-                    localStorage.removeItem("package_expired");
-                    localStorage.setItem("user_role",response.data.user.role)
+                alert("Login successful!");
+                sessionStorage.setItem("user_login", "true");
+                localStorage.removeItem("package_expired");
+                localStorage.setItem("user_role", response.data.user.role)
 
-                    try {
+                try {
+                    alert(response.data.user);
 
-                        await setUserData(response.data.expire_date, response.data.last_sync, response.data.user.name, response.data.user.email, password, response.data.package_type);
-
-                    } catch (error) {
-                        console.log(error);
-                    }
-                } else {
-                    alert("Invalied creadentials. Please try again.");
+                } catch (error) {
+                    console.log(error);
                 }
-                window.location.href = "/";
+
+                window.location.reload();
             }
             else {
                 alert("Invalid credentials. Please try again.");

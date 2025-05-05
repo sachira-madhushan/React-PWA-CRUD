@@ -1,8 +1,11 @@
 import axios from "axios";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import config from "../../configs/config";
+import getConfig from "../../configs/config";
+
 const Register = () => {
+    const config = getConfig();
+    
     const [formData, setFormData] = useState({
         name: "",
         email: "",

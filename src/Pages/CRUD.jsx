@@ -5,7 +5,7 @@ import idbPostCRUD from "../indexedDB/CRUD";
 import fetchAndStorePosts from "../indexedDB/fetchPosts&Store";
 import moment from "moment-timezone";
 import useUserData from "../indexedDB/userData";
-import config from "../configs/config";
+import getConfig from "../configs/config";
 import useBackup from "../indexedDB/backup";
 import localUserDB from "../indexedDB/localUserDB";
 import userManagement from "../local_server/userManagement";
@@ -41,7 +41,7 @@ const CRUD = () => {
     const [newUserRole, setNewUserRole] = useState("");
     const [newUserPassword, setNewUserPassword] = useState("");
 
-
+    const config = getConfig();
 
     const [isOpenManageUsersModel, setOpenManageUsersModel] = useState(false)
 
