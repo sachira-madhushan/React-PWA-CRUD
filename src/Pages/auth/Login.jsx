@@ -10,7 +10,7 @@ const Login = () => {
     const { setUserData, getUserName, offlineLogin } = userData();
     const [role, setRole] = useState(null);
     const config = getConfig();
-    
+
     const handleSubmit = (e) => {
         e.preventDefault();
         login();
@@ -32,41 +32,37 @@ const Login = () => {
     }, []);
 
     const login = async () => {
-        if (role == "host") {
+        if (role === "host") {
             const name = await getUserName();
             const package_type = localStorage.getItem("package_expired");
-
+    
             if (name && !package_type && navigator.onLine) {
-
                 const response = await axios.post(config.LOCAL_HOST + "/api/data", {
-                    expire_date: localStorage.getItem("expire_date")
+                    expire_date: localStorage.getItem("expire_date"),
+                    type: localStorage.getItem("package_type"),
+                    email: localStorage.getItem("email")
                 }, {
                     headers: {
                         "Content-Type": "application/json",
                         "Accept": "application/json",
                     }
                 });
-
+    
                 const result = await offlineLogin(email, password);
                 if (result) {
-                    // localStorage.setItem("user_login", "true");
                     sessionStorage.setItem("user_login", "true");
                     alert("Login success!");
                     window.location.reload();
                 } else {
                     const expired = localStorage.getItem("package_expired");
                     if (expired && expired == 1) {
-                        alert("Your package has been expired. Please contact admin to reactivate.")
+                        alert("Your package has been expired. Please contact admin to reactivate.");
                     } else {
-                        alert("Invalid credentials. Please try again.")
+                        alert("Invalid credentials. Please try again.");
                     }
                 }
-
-
-
-
+    
             } else {
-
                 if (navigator.onLine) {
                     try {
                         const response = await axios.post(config.URL + "/api/v1/auth/login", {
@@ -78,86 +74,78 @@ const Login = () => {
                                 "Accept": "application/json",
                             }
                         });
-
-                        if (response.status === 200) {
-
-                            if (response.data.user.status == 1) {
-                                alert("Login successful!");
-                                // localStorage.setItem("user_login", "true");
-                                sessionStorage.setItem("user_login", "true");
-                                localStorage.setItem("token", response.data.token);
-                                localStorage.removeItem("package_expired");
-                                // localStorage.setItem("user", JSON.stringify(response.data.user));
-                                // localStorage.setItem("expire_date", JSON.stringify(response.data.expire_date));
-                                // localStorage.setItem("last_sync", JSON.stringify(response.data.last_sync));
-
-                                try {
-
-                                    await setUserData(response.data.expire_date, response.data.last_sync, response.data.user.name, response.data.user.email, password, response.data.package_type);
-
-                                    const response = await axios.post(config.LOCAL_HOST + "/api/data", {
-                                        expire_date: localStorage.getItem("expire_date")
-                                    }, {
-                                        headers: {
-                                            "Content-Type": "application/json",
-                                            "Accept": "application/json",
-                                        }
-                                    });
-
-                                } catch (error) {
-                                    console.log(error);
+    
+                        if (response.status === 200 && response.data.user.status == 1) {
+                            alert("Login successful!");
+                            sessionStorage.setItem("user_login", "true");
+                            localStorage.setItem("token", response.data.token);
+                            localStorage.removeItem("package_expired");
+    
+                            await setUserData(
+                                response.data.expire_date,
+                                response.data.last_sync,
+                                response.data.user.name,
+                                response.data.user.email,
+                                password,
+                                response.data.package_type
+                            );
+    
+                            await axios.post(config.LOCAL_HOST + "/api/data", {
+                                expire_date: response.data.expire_date,
+                                type: response.data.package_type,
+                                email: response.data.user.email
+                            }, {
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "Accept": "application/json",
                                 }
-                            } else {
-                                alert("Your package is not activated yet. Please contact admin.");
-                            }
+                            });
+    
                             window.location.href = "/";
+                        } else {
+                            alert("Your package is not activated yet. Please contact admin.");
                         }
-                        else {
-                            alert("Invalid credentials. Please try again.");
-                        }
-
+    
                     } catch (error) {
                         alert("Invalid credentials. Please try again.");
                     }
+    
                 } else {
-                    alert("Go online to login")
+                    alert("Go online to login");
                 }
-
-
             }
-        } else if (role == "client") {
-            const response = await axios.post(config.LOCAL_HOST + "/api/users/login", {
-                email: email,
-                password: password,
-            }, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
+        } else if (role === "client") {
+            try {
+                const response = await axios.post(config.LOCAL_HOST + "/api/users/login", {
+                    email: email,
+                    password: password,
+                }, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                    }
+                });
+    
+                if (response.status === 200) {
+                    alert("Login successful!");
+                    sessionStorage.setItem("user_login", "true");
+                    localStorage.removeItem("package_expired");
+    
+                    localStorage.setItem("user_name", response.data.user.role);
+                    localStorage.setItem("expire_date", response.data.user.expire_date);
+                    localStorage.setItem("last_sync", response.data.user.last_sync);
+    
+                    window.location.reload();
+                } else {
+                    alert("Invalid credentials. Please try again.");
                 }
-            });
-
-            if (response.status === 200) {
-
-                alert("Login successful!");
-                sessionStorage.setItem("user_login", "true");
-                localStorage.removeItem("package_expired");
-                localStorage.setItem("user_role", response.data.user.role)
-
-                try {
-                    alert(response.data.user);
-
-                } catch (error) {
-                    console.log(error);
-                }
-
-                window.location.reload();
-            }
-            else {
+    
+            } catch (error) {
                 alert("Invalid credentials. Please try again.");
             }
         }
-
-    }
+    };
+    
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">

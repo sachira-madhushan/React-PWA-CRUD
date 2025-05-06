@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import initLocalUserDB from '../db/initLocalUserDB';
 import axios from 'axios';
 import userData from './userData';
-import config from '../configs/config';
+import getConfig from '../configs/config';
 import moment from 'moment-timezone';
 
 const localUserDB = () => {
@@ -11,7 +11,8 @@ const localUserDB = () => {
     const [db, setDb] = useState(null);
     const [syncStatus, setSyncStatus] = useState(false);
     const { setLastSyncDate } = userData();
-
+    const config=getConfig();
+    
     useEffect(() => {
         const initializeDB = async () => {
             const database = await initLocalUserDB();

@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import { decryptPassword, encryptPassword } from "../security/encrypt";
 import axios from "axios";
 import config from "../configs/config";
+
 const useUserData = () => {
     const [dbInstance, setDbInstance] = useState(null);
 
@@ -13,20 +14,51 @@ const useUserData = () => {
     const [packageType, setPackageType] = useState();
 
     useEffect(() => {
+        let isMounted = true;
+
         const initializeDB = async () => {
-            const db = await openDB('userDB', 1, {
-                upgrade(db) {
-                    if (!db.objectStoreNames.contains('user')) {
-                        db.createObjectStore('user', { keyPath: "key" });
+            try {
+                const db = await openDB('userDB', 1, {
+                    upgrade(db) {
+                        if (!db.objectStoreNames.contains('user')) {
+                            db.createObjectStore('user', { keyPath: "key" });
+                        }
                     }
+                });
+
+                if (isMounted) {
+                    setDbInstance(db);
+                    await loadData(db);
+                } else {
+                    db.close();
                 }
-            });
-            setDbInstance(db);
-            await loadData(db);
+            } catch (error) {
+                console.error("DB Initialization error:", error);
+            }
         };
 
         initializeDB();
-    }, [user_name, expireDate, last_sync]);
+
+        return () => {
+            isMounted = false;
+            if (dbInstance && !dbInstance.closed) {
+                dbInstance.close();
+            }
+        };
+    }, []);
+
+    const waitForDB = async () => {
+        if (dbInstance && !dbInstance.closed) return dbInstance;
+
+        return new Promise((resolve) => {
+            const interval = setInterval(() => {
+                if (dbInstance && !dbInstance.closed) {
+                    clearInterval(interval);
+                    resolve(dbInstance);
+                }
+            }, 50);
+        });
+    };
 
     const loadData = async (db) => {
         const name = await getItem("user_name", db);
@@ -39,19 +71,12 @@ const useUserData = () => {
         setLastSync(lastSyncDate);
         setPackageType(package_type);
 
-        if (name && expirationDate, lastSyncDate, package_type) {
+        if (name && expirationDate && lastSyncDate && package_type) {
             localStorage.setItem("user_name", name);
             localStorage.setItem("expire_date", expirationDate);
             localStorage.setItem("last_sync", lastSyncDate);
-            localStorage.setItem("package_type", packageType);
+            localStorage.setItem("package_type", package_type);
         }
-    };
-
-    const waitForDB = async () => {
-        while (!dbInstance) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-        return dbInstance;
     };
 
     const setUserData = async (expire_date, last_sync, user_name, user_email, user_password, package_type) => {
@@ -59,9 +84,6 @@ const useUserData = () => {
             const db = await waitForDB();
             const transaction = db.transaction('user', 'readwrite');
             const store = transaction.objectStore('user');
-
-            // const salt = bcrypt.genSaltSync(10);
-            // const hashed_password = bcrypt.hashSync(user_password, salt);
 
             const encrypted_password = encryptPassword(user_password, user_email);
 
@@ -73,44 +95,61 @@ const useUserData = () => {
             await store.put({ key: "package_type", value: package_type });
 
             await transaction.done;
+
             setUsername(user_name);
             setExpireDate(expire_date);
             setLastSync(last_sync);
+            setPackageType(package_type);
 
         } catch (error) {
-            alert("Error saving data: " + error);
+            alert("Error saving data: " + error.message);
         }
     };
 
-    const getItem = async (key, db) => {
-        const currentDB = db || await waitForDB();
-        const transaction = currentDB.transaction('user', 'readonly');
-        const store = transaction.objectStore('user');
-        const result = await store.get(key);
-        return result?.value ?? null;
+    const getItem = async (key, db = null) => {
+        try {
+            const currentDB = db || await waitForDB();
+            const transaction = currentDB.transaction('user', 'readonly');
+            const store = transaction.objectStore('user');
+            const result = await store.get(key);
+            return result?.value ?? null;
+        } catch (error) {
+            console.error(`Error getting item '${key}':`, error);
+            return null;
+        }
     };
 
-    const getUserName = async () => {
-        return await getItem("user_name");
-    };
+    const getUserName = async () => await getItem("user_name");
 
-    const getExpireDate = async () => {
-        return await getItem("expire_date");
-    };
+    const getExpireDate = async () => await getItem("expire_date");
 
-    const getPackageType = async () => {
-        return await getItem("package_type");
+    const getPackageType = async () => await getItem("package_type");
+
+    const getLastSyncDate = async () => await getItem("last_sync");
+
+    const setLastSyncDate = async (last_sync) => {
+        try {
+            const db = await waitForDB();
+            const transaction = db.transaction('user', 'readwrite');
+            const store = transaction.objectStore('user');
+
+            await store.put({ key: "last_sync", value: last_sync });
+            await transaction.done;
+
+            setLastSync(last_sync);
+        } catch (error) {
+            console.error("Failed to set last sync date:", error);
+        }
     };
 
     const offlineLogin = async (email, password) => {
         const real_email = await getItem("user_email");
         const real_password = await getItem("user_password");
 
-        localStorage.setItem("email",real_email);
-        localStorage.setItem("password",real_password);
+        localStorage.setItem("email", real_email);
+        localStorage.setItem("password", real_password);
 
         const decrypted_password = decryptPassword(real_password, real_email);
-        console.log(decrypted_password, real_email, real_password);
 
         if (!real_email || !real_password) return false;
 
@@ -119,28 +158,13 @@ const useUserData = () => {
         return real_email === email && passwordMatch;
     };
 
-    const setLastSyncDate = async (last_sync) => {
-        const db = await waitForDB();
-        const transaction = db.transaction('user', 'readwrite');
-        const store = transaction.objectStore('user');
-
-        await store.put({ key: "last_sync", value: last_sync });
-        await transaction.done;
-
-        setLastSync(last_sync);
-    };
-
-    const getLastSyncDate = async () => {
-        return await getItem("last_sync");
-    };
-
-    const verifyBeforeSync = async() => {
+    const verifyBeforeSync = async () => {
         const real_email = localStorage.getItem("email");
-        const real_password =localStorage.getItem("password");
+        const real_password = localStorage.getItem("password");
         const decrypted_password = decryptPassword(real_password, real_email);
 
         try {
-            const response = await axios.post(config.URL + "/api/v1/auth/login", {
+            const response = await axios.post(`${config.URL}/api/v1/auth/login`, {
                 email: real_email,
                 password: decrypted_password,
             }, {
@@ -149,25 +173,22 @@ const useUserData = () => {
                     "Accept": "application/json",
                 }
             });
-    
-            if (response.status === 200) {
-    
-                if (response.data.user.status == 1) {
-                    localStorage.setItem("token", response.data.token);
-                    try {
-                        
-                        await setUserData(response.data.expire_date, response.data.last_sync, response.data.user.name, response.data.user.email, password, response.package_type);
-    
-                    } catch (error) {
-                        console.log(error);
-                    }
-                }
+
+            if (response.status === 200 && response.data.user?.status == 1) {
+                localStorage.setItem("token", response.data.token);
+                await setUserData(
+                    response.data.expire_date,
+                    response.data.last_sync,
+                    response.data.user.name,
+                    response.data.user.email,
+                    decrypted_password,
+                    response.data.package_type
+                );
             }
-            console.log(response)
         } catch (error) {
-            console.log(error);
+            console.error("Verify sync failed:", error);
         }
-    }
+    };
 
     return {
         user_name,

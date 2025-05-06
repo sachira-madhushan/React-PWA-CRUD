@@ -46,7 +46,7 @@ const CRUD = () => {
     const [isOpenManageUsersModel, setOpenManageUsersModel] = useState(false)
 
 
-    const {createUser,getUsers,users}=userManagement();
+    const { createUser, getUsers, users } = userManagement();
 
     const logout = () => {
         // localStorage.removeItem("user_login");
@@ -57,15 +57,15 @@ const CRUD = () => {
 
     const handleFileSelect = (e) => {
         const file = e.target.files[0];
-        if (file && file.type === 'application/json') {
-            const filenameRegex = /^posts-backup-\d{4}-\d{2}-\d{2} \d{2}_\d{2}_\d{2}\.json$/;
+        if (file && file.name.endsWith('.db')) {
+            const filenameRegex = /^backup-\d{4}-\d{2}-\d{2} \d{2}_\d{2}_\d{2}\.db$/;
             if (!filenameRegex.test(file.name)) {
-                alert('Please select a valid backup file.');
+                alert('Please select a valid .db backup file.');
                 return;
             }
             setSelectedFile(file);
         } else {
-            alert('Please select a valid backup file.');
+            alert('Please select a valid .db backup file.');
         }
     };
 
@@ -89,9 +89,11 @@ const CRUD = () => {
                 localStorage.clear();
                 localStorage.setItem("package_expired", 1);
                 indexedDB.deleteDatabase("usersDB");
+                sessionStorage.clear();
                 window.location.reload();
             } else {
                 setLastSyncDate(moment().format("YYYY-MM-DD HH:mm:ss"));
+                localStorage.setItem("last_sync", moment().format("YYYY-MM-DD HH:mm:ss"));
             }
 
             const diffInMinutes = expire_date.diff(now, 'minutes');
@@ -108,28 +110,28 @@ const CRUD = () => {
         return () => clearInterval(interval);
     }, [remaining]);
 
-    useEffect(() => {
-        if(role=="host"){
-            const intervalId = setInterval(() => {
-                const autoSync = async () => {
-                    const token = localStorage.getItem("token");
-                    setIsLoading(true);
-                    if (token) {
-                        await sync();
-                        setSyncStatusLocal(true);
-                    } else {
-                        await verifyBeforeSync();
-                        await sync();
-                    }
-                    setIsLoading(false);
-                    fetchPosts();
-                };
-                autoSync();
-            }, 30000);
-    
-            return () => clearInterval(intervalId);
-        }
-    }, [package_type]);
+    // useEffect(() => {
+    //     if (role == "host") {
+    //         const intervalId = setInterval(() => {
+    //             const autoSync = async () => {
+    //                 const token = localStorage.getItem("token");
+    //                 setIsLoading(true);
+    //                 if (token) {
+    //                     await sync();
+    //                     setSyncStatusLocal(true);
+    //                 } else {
+    //                     await verifyBeforeSync();
+    //                     await sync();
+    //                 }
+    //                 setIsLoading(false);
+    //                 fetchPosts();
+    //             };
+    //             autoSync();
+    //         }, 30000);
+
+    //         return () => clearInterval(intervalId);
+    //     }
+    // }, [package_type]);
 
     const formatDuration = (minutes) => {
         const duration = moment.duration(minutes, 'minutes');
@@ -142,38 +144,90 @@ const CRUD = () => {
     };
 
     const fetchPosts = async () => {
-        if (role == "host") {
-            const filteredPosts = allPostsIDB.filter(post => post.syncStatus !== 'synced');
-            if (filteredPosts.length > 0) setSyncStatusLocal(false);
-            setPosts(postsIDB);
-            setLocalUsers(allUsersIDB);
+        // const filteredPosts = allPostsIDB.filter(post => post.syncStatus !== 'synced');
+        // if (filteredPosts.length > 0) setSyncStatusLocal(false);
+
+
+        // setPosts(postsIDB);
+
+        const response = await axios.get(config.LOCAL_HOST + "/api/posts", {});
+
+        if (response.status === 200) {
+
+            const filteredPosts = response.data.posts.filter(post => post.sync_status !== 'deleted');
+            setPosts(filteredPosts);
         }
+
+
+        setLocalUsers(allUsersIDB);
 
     };
 
     const createPost = async () => {
-        if (role == "host") {
+        // if (role == "host") {
 
-            setSyncStatusLocal(false);
-            addPostIDB({ title, body });
+        //     setSyncStatusLocal(false);
+        //     addPostIDB({ title, body });
+        // }
+
+        const response = await axios.post(config.LOCAL_HOST + "/api/posts", {
+            title: title,
+            body: body,
+        }, {
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            }
+        });
+
+        if (response.status === 200) {
+
+            const filteredPosts = response.data.posts.filter(post => post.sync_status !== 'deleted');
+            setPosts(filteredPosts);
         }
     };
 
     const deletePost = async (id) => {
-        if (role == "host") {
-            setSyncStatusLocal(false);
-            deletePostIDB(id);
+        const response = await axios.delete(config.LOCAL_HOST + "/api/posts/" + id, {});
+
+        if (response.status === 200) {
+            const filteredPosts = response.data.posts.filter(post => post.sync_status !== 'deleted');
+            setPosts(filteredPosts);
         }
     };
 
     const addUser = async () => {
         if (role == "host") {
-            await createUser(newUserName, newUserEmail, newUserRole, newUserPassword);
+            await createUser(newUserName, newUserEmail, newUserPassword ,newUserRole);
         }
     }
 
     const manageUsers = () => {
         setOpenManageUsersModel(true);
+    }
+
+
+    const getBackup = async () => {
+        const response = await axios.get(config.LOCAL_HOST + "/api/backup", {});
+        if (response.status === 200) {
+            alert("Backup saved to downloads folder.")
+        }
+    }
+
+    const restoreBackup = async () => {
+        const formData = new FormData();
+        formData.append("backupFile", selectedFile);
+
+        const response = await axios.post(config.LOCAL_HOST + "/api/backup", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+                "Accept": "application/json",
+            }
+        });
+
+        if (response.status === 200) {
+            alert("Backup saved successfully.");
+        }
     }
 
     useEffect(() => {
@@ -188,13 +242,6 @@ const CRUD = () => {
                 </div>
             )}
 
-            {isLoading && package_type == 1 && (
-                <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-4 rounded mb-4" role="alert">
-                    <span className="block sm:inline">Your posts are auto syncing to the cloud...</span>
-                    {/* <button onClick={syncToCloud}>Sync</button> */}
-                </div>
-            )}
-
             <div className="bg-green-100 rounded p-2 mb-2 overflow-auto">
                 <div className="float-start">
                     <h1 className="pl-2 pt-2 text-green-800">{formatDuration(remaining) + " "}</h1>
@@ -203,7 +250,7 @@ const CRUD = () => {
                 {
                     role == "host" && (
                         <div className="float-end">
-                            <button type="button" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onClick={() => backupIndexedDB()}>Backup</button>
+                            <button type="button" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onClick={() => getBackup()}>Backup</button>
                             <button type="button" className="bg-green-500 text-white px-4 py-2 mx-2 rounded hover:bg-green-600" onClick={() => setIsBackupOpen(true)}>Restore Backup</button>
                         </div>
                     )
@@ -215,7 +262,7 @@ const CRUD = () => {
                 <h1 className="text-2xl font-bold mb-4 float-right">Hello {user_name}!</h1>
                 <button type="button" className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 float-right mr-2" onClick={logout}>Logout</button>
                 {
-                    // This must be equlas to the host to manage the users
+                    
                     role == "host" && (
 
                         <button type="button" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 float-right mr-2" onClick={manageUsers}>Manage Users</button>
@@ -246,7 +293,11 @@ const CRUD = () => {
                     <div key={index} className="border p-4 mb-2 rounded shadow">
                         <h2 className="text-xl font-semibold">{post.title}</h2>
                         <p>{post.body}</p>
-                        <button type="button" className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600 mt-2" onClick={() => deletePost(post.id)}>Delete</button>
+                        {
+                            role == "host" && (
+                                <button type="button" className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600 mt-2" onClick={() => deletePost(post.id)}>Delete</button>
+                            )
+                        }
                     </div>
                 ))}
             </div>
@@ -255,13 +306,12 @@ const CRUD = () => {
                     <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
                         <h2 className="text-2xl font-semibold mb-4 text-center">Restore Backup</h2>
 
-                        <form onSubmit={() => restoreIndexedDB(selectedFile)} className="space-y-4">
+                        <form className="space-y-4">
                             <div>
                                 <input
                                     type="file"
-                                    id="restore-json"
-                                    accept="application/json"
-
+                                    id="restore-db"
+                                    accept=".db"
                                     onChange={handleFileSelect}
                                 />
                             </div>
@@ -270,7 +320,10 @@ const CRUD = () => {
                                     <div className="flex justify-between items-center">
 
                                         <button
-                                            type="submit"
+                                            onClick={async (e) => {
+                                                e.preventDefault();
+                                                await restoreBackup();
+                                            }}
                                             className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
                                         >
                                             Restore

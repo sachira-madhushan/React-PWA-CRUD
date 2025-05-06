@@ -1,10 +1,10 @@
 import axios from "axios";
-import config from "../configs/config";
+import getConfig from "../configs/config";
 import { useEffect,useState } from "react";
 
 const userManagement = () => {
     const [users, setUsers] = useState([]);
-
+    const config=getConfig();
 
     useEffect(
         () => {
