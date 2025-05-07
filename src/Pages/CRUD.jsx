@@ -84,8 +84,14 @@ const CRUD = () => {
             const expire_date = moment.tz(expireDate, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
             const last_sync_formatted = moment.tz(last_sync, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
 
-            if (now < last_sync_formatted || expire_date < now) {
+            if (now < last_sync_formatted) {
                 alert("Your system time has been changed. Please correct your system time and login.");
+                localStorage.clear();
+                indexedDB.deleteDatabase("usersDB");
+                sessionStorage.clear();
+                window.location.reload();
+            }else if( expire_date < now){
+                alert("Your package has been expired.Please contact admin to reactivate.");
                 localStorage.clear();
                 localStorage.setItem("package_expired", 1);
                 indexedDB.deleteDatabase("usersDB");
