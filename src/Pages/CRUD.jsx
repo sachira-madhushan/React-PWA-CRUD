@@ -1,40 +1,23 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import usePostsIDB from "../indexedDB/usePosts";
-import idbPostCRUD from "../indexedDB/CRUD";
-import fetchAndStorePosts from "../indexedDB/fetchPosts&Store";
 import moment from "moment-timezone";
 import useUserData from "../indexedDB/userData";
 import getConfig from "../configs/config";
-import useBackup from "../indexedDB/backup";
-import localUserDB from "../indexedDB/localUserDB";
 import userManagement from "../local_server/userManagement";
 
 const CRUD = () => {
     const [posts, setPosts] = useState([]);
     const [title, setTitle] = useState("");
     const [body, setBody] = useState("");
-    const { isOffline } = usePostsIDB();
-    const { postsIDB, allPostsIDB, addPostIDB, deletePostIDB, sync } = idbPostCRUD();
-    const [syncStatusLocal, setSyncStatusLocal] = useState(true);
-    const [isLoading, setIsLoading] = useState(false);
     const [remaining, setRemaining] = useState(0);
-    const [isOpen, setIsOpen] = useState(false);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const [isBackupOpen, setIsBackupOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [role, setRole] = useState("Please wait...");
     const user_name = localStorage.getItem("user_name");
-    const package_type = localStorage.getItem("package_type");
+    const [isOpenManageUsersModel,setOpenManageUsersModel] = useState(false);
+    
+    const { setLastSyncDate} = useUserData();
 
-    const { backupIndexedDB, restoreIndexedDB } = useBackup();
-    const { setLastSyncDate, verifyBeforeSync } = useUserData();
-
-
-    const { allUsersIDB, addUserIDB } = localUserDB();
-
-    const [localUsers, setLocalUsers] = useState([]);
 
     const [newUserName, setNewUserName] = useState("");
     const [newUserEmail, setNewUserEmail] = useState("");
@@ -43,13 +26,9 @@ const CRUD = () => {
 
     const config = getConfig();
 
-    const [isOpenManageUsersModel, setOpenManageUsersModel] = useState(false)
-
-
-    const { createUser, getUsers, users } = userManagement();
+    const { createUser, users } = userManagement();
 
     const logout = () => {
-        // localStorage.removeItem("user_login");
         sessionStorage.removeItem("user_login");
         localStorage.removeItem("token");
         window.location.reload();
@@ -70,7 +49,6 @@ const CRUD = () => {
     };
 
     useEffect(() => {
-        setLocalUsers(allUsersIDB);
         setRole(sessionStorage.getItem("ROLE"));
         const interval = setInterval(() => {
             const roleFromLocalStorage = sessionStorage.getItem("ROLE");
@@ -129,29 +107,6 @@ const CRUD = () => {
         return () => clearInterval(interval);
     }, [remaining]);
 
-    // useEffect(() => {
-    //     if (role == "host") {
-    //         const intervalId = setInterval(() => {
-    //             const autoSync = async () => {
-    //                 const token = localStorage.getItem("token");
-    //                 setIsLoading(true);
-    //                 if (token) {
-    //                     await sync();
-    //                     setSyncStatusLocal(true);
-    //                 } else {
-    //                     await verifyBeforeSync();
-    //                     await sync();
-    //                 }
-    //                 setIsLoading(false);
-    //                 fetchPosts();
-    //             };
-    //             autoSync();
-    //         }, 30000);
-
-    //         return () => clearInterval(intervalId);
-    //     }
-    // }, [package_type]);
-
     const formatDuration = (minutes) => {
         const duration = moment.duration(minutes, 'minutes');
         const years = Math.floor(duration.asYears());
@@ -163,11 +118,6 @@ const CRUD = () => {
     };
 
     const fetchPosts = async () => {
-        // const filteredPosts = allPostsIDB.filter(post => post.syncStatus !== 'synced');
-        // if (filteredPosts.length > 0) setSyncStatusLocal(false);
-
-
-        // setPosts(postsIDB);
 
         const response = await axios.get(config.LOCAL_HOST + "/api/posts", {});
 
@@ -177,18 +127,9 @@ const CRUD = () => {
             setPosts(filteredPosts);
         }
 
-
-        setLocalUsers(allUsersIDB);
-
     };
 
     const createPost = async () => {
-        // if (role == "host") {
-
-        //     setSyncStatusLocal(false);
-        //     addPostIDB({ title, body });
-        // }
-
         const response = await axios.post(config.LOCAL_HOST + "/api/posts", {
             title: title,
             body: body,
@@ -251,15 +192,10 @@ const CRUD = () => {
 
     useEffect(() => {
         fetchPosts();
-    }, [postsIDB]);
+    }, [posts]);
 
     return (
         <div className="p-6 max-w-4xl mx-auto">
-            {isOffline && package_type == 1 && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
-                    <span className="block sm:inline"> You are currently offline.</span>
-                </div>
-            )}
 
             <div className="bg-green-100 rounded p-2 mb-2 overflow-auto">
                 <div className="float-start">
@@ -393,14 +329,13 @@ const CRUD = () => {
                             <div>
                                 {
                                     users.map((user, index) => (
-                                        <div className="border rounded ">
+                                        <div key={user.email || index} className="border rounded ">
                                             <div className="p-2">
                                                 <h1>Username : {user.name}</h1>
                                                 <h1>Email : {user.email}</h1>
                                                 <h1>Role : {user.role}</h1>
                                                 <h1>Password : {user.password}</h1>
                                             </div>
-
                                         </div>
                                     ))
                                 }

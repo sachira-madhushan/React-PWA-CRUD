@@ -16,7 +16,6 @@ const Login = () => {
         login();
     };
 
-
     useEffect(() => {
 
         const interval = setInterval(() => {
