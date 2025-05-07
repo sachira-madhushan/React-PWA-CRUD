@@ -65,19 +65,26 @@ const useUserData = () => {
         const expirationDate = await getItem("expire_date", db);
         const lastSyncDate = await getItem("last_sync", db);
         const package_type = await getItem("package_type", db);
-
+    
+        console.log("Loaded from IndexedDB:", {
+            name, expirationDate, lastSyncDate, package_type
+        });
+    
         setUsername(name);
         setExpireDate(expirationDate);
         setLastSync(lastSyncDate);
         setPackageType(package_type);
-
-        if (name && expirationDate && lastSyncDate && package_type) {
+    
+        if (name && expirationDate && lastSyncDate) {
             localStorage.setItem("user_name", name);
             localStorage.setItem("expire_date", expirationDate);
             localStorage.setItem("last_sync", lastSyncDate);
             localStorage.setItem("package_type", package_type);
+        } else {
+            console.warn("Some values were missing, localStorage not fully set.");
         }
     };
+    
 
     const setUserData = async (expire_date, last_sync, user_name, user_email, user_password, package_type) => {
         try {
@@ -153,8 +160,11 @@ const useUserData = () => {
 
         if (!real_email || !real_password) return false;
 
-        const passwordMatch = password === decrypted_password;
+        const db = await waitForDB();
 
+        await loadData(db);
+        
+        const passwordMatch = password === decrypted_password;
         return real_email === email && passwordMatch;
     };
 

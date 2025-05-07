@@ -74,33 +74,46 @@ const CRUD = () => {
         setRole(sessionStorage.getItem("ROLE"));
         const interval = setInterval(() => {
             const roleFromLocalStorage = sessionStorage.getItem("ROLE");
-            if (!roleFromLocalStorage) {
+            if (roleFromLocalStorage) {
                 setRole(roleFromLocalStorage);
             }
+
             const now = moment.tz("Asia/Colombo");
             const last_sync = localStorage.getItem("last_sync");
             const expireDate = localStorage.getItem("expire_date");
 
+            if (!last_sync || !expireDate) {
+                return;
+            }
+
             const expire_date = moment.tz(expireDate, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
             const last_sync_formatted = moment.tz(last_sync, "YYYY-MM-DD HH:mm:ss", "Asia/Colombo");
 
-            if (now < last_sync_formatted) {
+            if (now.isBefore(last_sync_formatted)) {
                 alert("Your system time has been changed. Please correct your system time and login.");
                 localStorage.clear();
                 indexedDB.deleteDatabase("usersDB");
                 sessionStorage.clear();
                 window.location.reload();
-            }else if( expire_date < now){
-                alert("Your package has been expired.Please contact admin to reactivate.");
+                return;
+            } else if (now.isAfter(expire_date)) {
+                alert("Your package has expired. Please contact admin to reactivate.");
                 localStorage.clear();
                 localStorage.setItem("package_expired", 1);
                 indexedDB.deleteDatabase("usersDB");
                 sessionStorage.clear();
                 window.location.reload();
+                return;
             } else {
-                setLastSyncDate(moment().format("YYYY-MM-DD HH:mm:ss"));
-                localStorage.setItem("last_sync", moment().format("YYYY-MM-DD HH:mm:ss"));
+                const nowFormatted = moment.tz("Asia/Colombo").format("YYYY-MM-DD HH:mm:ss");
+
+                if (now.isAfter(last_sync_formatted)) {
+                    setLastSyncDate(nowFormatted);
+                    localStorage.setItem("last_sync", nowFormatted);
+                }
             }
+
+
 
             const diffInMinutes = expire_date.diff(now, 'minutes');
             const diffInSeconds = expire_date.diff(now, 'seconds');
@@ -204,7 +217,7 @@ const CRUD = () => {
 
     const addUser = async () => {
         if (role == "host") {
-            await createUser(newUserName, newUserEmail, newUserPassword ,newUserRole);
+            await createUser(newUserName, newUserEmail, newUserPassword, newUserRole);
         }
     }
 
@@ -268,7 +281,7 @@ const CRUD = () => {
                 <h1 className="text-2xl font-bold mb-4 float-right">Hello {user_name}!</h1>
                 <button type="button" className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 float-right mr-2" onClick={logout}>Logout</button>
                 {
-                    
+
                     role == "host" && (
 
                         <button type="button" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 float-right mr-2" onClick={manageUsers}>Manage Users</button>
